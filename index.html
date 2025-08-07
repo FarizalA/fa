@@ -381,7 +381,10 @@
         }
         
         async function getAiAnalysis() {
+            const apiKey = "AIzaSyA_KGVm0tVRGc6hG9rZmvvBpjRZnXfhP_Y";
+
             aiErrorMessage.classList.add('hidden');
+            
             if (allTransactions.length < 3) {
                 aiResultContainer.innerHTML = 'Mohon miliki minimal 3 transaksi (total) untuk analisis.';
                 return;
@@ -392,30 +395,27 @@
             btnText.textContent = 'Menganalisis...';
             
             const formattedTransactions = allTransactions.map(t => `- ${t.jenis}: ${t.deskripsi} (${formatRupiah(t.nominal)})`).join('\n');
-            const prompt = `Anda adalah seorang konsultan bisnis UMKM di Indonesia. Berdasarkan data transaksi ini:\n${formattedTransactions}\n\nBerikan:\n1. Analisis singkat kondisi keuangan (maks 2 kalimat).\n2. Tiga (3) tips konkret dalam format daftar bernomor untuk meningkatkan usaha.\nSampaikan dengan bahasa yang positif dan mudah dipahami. Jangan gunakan markdown tebal atau miring.`;
+            const prompt = `Kamu adalah Xyli Asisten AI yang cerdas, ramah, dan serba bisa dari farizaladha. Anggap dirimu sebagai teman ngobrol yang asyik dan punya banyak pengetahuan. Kepribadian Anda suportif, dan sedikit edukatif. Fungsi utama Anda adalah konsultan bisnis. Berdasarkan data transaksi ini:\n${formattedTransactions}\n\nBerikan:\n1. Analisis singkat kondisi keuangan (maks 2 kalimat).\n2. Tiga (3) tips konkret dalam format daftar bernomor untuk meningkatkan usaha.\nSampaikan dengan bahasa yang santai dan mudah dipahami. Jangan gunakan markdown tebal atau miring.`;
 
             try {
-                // --- PERUBAHAN UTAMA DI SINI ---
-                // Kirim permintaan ke Google Apps Script sebagai proxy
-                const payload = { 
-                    action: 'getAiAnalysis',
-                    prompt: prompt 
-                };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
                 
-                const response = await fetch(GOOGLE_SHEET_API_URL, {
+                const response = await fetch(apiUrl, {
                     method: 'POST',
-                    body: JSON.stringify(payload),
                     headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-                
-                if (!response.ok) throw new Error(`Permintaan ke proxy gagal.`);
+
+                if (!response.ok) throw new Error(`Permintaan API gagal.`);
                 
                 const result = await response.json();
                 
-                if (result.status === 'success') {
-                    aiResultContainer.innerHTML = result.text.replace(/\n/g, '<br>');
+                if (result.candidates && result.candidates[0]) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    aiResultContainer.innerHTML = text.replace(/\n/g, '<br>');
                 } else {
-                    throw new Error(result.message || "Respons dari proxy tidak valid.");
+                    throw new Error("Respons dari AI tidak valid.");
                 }
 
             } catch (error) {
