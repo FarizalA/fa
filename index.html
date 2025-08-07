@@ -14,28 +14,13 @@
         .spinner, .table-spinner { border-top-color: #4f46e5; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .deleting { opacity: 0.5; pointer-events: none; }
-
-        /* --- Gaya Scrollbar Transparan --- */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(156, 163, 175, 0.3); /* Abu-abu semi-transparan */
-            border-radius: 20px;
-            border: 3px solid transparent;
-            background-clip: content-box;
-        }
-        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-            background-color: rgba(156, 163, 175, 0.5); /* Lebih terlihat saat di-hover */
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.3); border-radius: 20px; border: 3px solid transparent; background-clip: content-box; }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); }
     </style>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
@@ -45,7 +30,6 @@
         <header class="relative text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Catatan Ku</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-2">Hay Selamat Datang</p>
-            <!-- Tombol Dark Mode Toggle -->
             <div class="absolute top-0 right-0">
                 <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
                     <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
@@ -55,7 +39,7 @@
         </header>
 
         <main>
-            <!-- Ringkasan Saldo (Keseluruhan) -->
+            <!-- Sections remain the same -->
             <section id="saldo-section" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
                 <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Ringkasan Keuangan (Total)</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
@@ -74,9 +58,7 @@
                 </div>
             </section>
             
-            <!-- Form dan Analisis AI -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <!-- Form Input Transaksi -->
                 <section id="form-section" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                     <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Tambah Transaksi Baru</h2>
                     <form id="transaction-form" class="space-y-4">
@@ -102,7 +84,6 @@
                         </div>
                     </form>
                 </section>
-                <!-- Analisis AI -->
                 <section id="ai-analysis-section" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                     <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Analisis Keuangan Cerdas ✨</h2>
                     <div id="ai-result-container" class="bg-indigo-50 dark:bg-gray-700/50 p-4 rounded-lg min-h-[150px] prose max-w-none dark:text-gray-300">Klik tombol untuk mendapatkan analisis dari AI.</div>
@@ -116,11 +97,9 @@
                 </section>
             </div>
 
-            <!-- Riwayat Transaksi Hari Ini -->
             <section id="history-section-today" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
                 <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Riwayat Transaksi Hari Ini</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Kolom Pemasukan Hari Ini -->
                     <div>
                         <h3 class="text-lg font-medium text-green-700 dark:text-green-400 mb-3">Pemasukan</h3>
                         <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
@@ -130,14 +109,13 @@
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
-                                        <th class="relative px-4 py-2"><span class="sr-only">Hapus</span></th>
+                                        <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="pemasukan-list-today" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
-                    <!-- Kolom Pengeluaran Hari Ini -->
                     <div>
                         <h3 class="text-lg font-medium text-red-700 dark:text-red-400 mb-3">Pengeluaran</h3>
                         <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
@@ -147,7 +125,7 @@
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
-                                        <th class="relative px-4 py-2"><span class="sr-only">Hapus</span></th>
+                                        <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="pengeluaran-list-today" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
@@ -157,11 +135,9 @@
                 </div>
             </section>
 
-            <!-- Semua Riwayat Transaksi -->
             <section id="history-section-all" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                 <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Semua Riwayat Transaksi</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Kolom Semua Pemasukan -->
                     <div>
                         <h3 class="text-lg font-medium text-green-700 dark:text-green-400 mb-3">Pemasukan</h3>
                         <div class="overflow-y-auto max-h-80 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
@@ -171,14 +147,13 @@
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
-                                        <th class="relative px-4 py-2"><span class="sr-only">Hapus</span></th>
+                                        <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="pemasukan-list-all" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
-                    <!-- Kolom Semua Pengeluaran -->
                     <div>
                         <h3 class="text-lg font-medium text-red-700 dark:text-red-400 mb-3">Pengeluaran</h3>
                         <div class="overflow-y-auto max-h-80 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
@@ -188,7 +163,7 @@
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
-                                        <th class="relative px-4 py-2"><span class="sr-only">Hapus</span></th>
+                                        <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="pengeluaran-list-all" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
@@ -198,6 +173,37 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white dark:bg-gray-800">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Edit Transaksi</h3>
+                <div class="mt-2 px-7 py-3">
+                    <form id="edit-form" class="space-y-4 text-left">
+                        <input type="hidden" id="edit-id">
+                        <input type="hidden" id="edit-jenis">
+                        <div>
+                            <label for="edit-deskripsi" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Deskripsi</label>
+                            <input type="text" id="edit-deskripsi" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm" required>
+                        </div>
+                        <div>
+                            <label for="edit-nominal" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Nominal (Rp)</label>
+                            <input type="number" id="edit-nominal" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="items-center px-4 py-3 space-y-2">
+                    <button id="save-edit-btn" class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        Simpan Perubahan
+                    </button>
+                     <button id="cancel-edit-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -257,22 +263,21 @@
         const btnText = document.getElementById('btn-text');
         const aiErrorMessage = document.getElementById('ai-error-message');
         
+        // Edit Modal Elements
+        const editModal = document.getElementById('edit-modal');
+        const editForm = document.getElementById('edit-form');
+        const saveEditBtn = document.getElementById('save-edit-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const editIdInput = document.getElementById('edit-id');
+        const editJenisInput = document.getElementById('edit-jenis');
+        const editDeskripsiInput = document.getElementById('edit-deskripsi');
+        const editNominalInput = document.getElementById('edit-nominal');
+
         let allTransactions = [];
 
-        function formatRupiah(angka) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-        }
-
-        function formatTanggal(isoString) {
-            if (!isoString) return '';
-            const date = new Date(isoString);
-            const options = { day: '2-digit', month: 'short', year: '2-digit' };
-            return date.toLocaleDateString('id-ID', options).replace(/\./g, '');
-        }
-
-        function showTableLoading(tbody) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4"><div class="flex justify-center items-center text-sm text-gray-500 dark:text-gray-400"><div class="table-spinner w-4 h-4 border-2 border-gray-300 rounded-full mr-2"></div>Memuat...</div></td></tr>`;
-        }
+        function formatRupiah(angka) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka); }
+        function formatTanggal(isoString) { if (!isoString) return ''; const date = new Date(isoString); const options = { day: '2-digit', month: 'short', year: '2-digit' }; return date.toLocaleDateString('id-ID', options).replace(/\./g, ''); }
+        function showTableLoading(tbody) { tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4"><div class="flex justify-center items-center text-sm text-gray-500 dark:text-gray-400"><div class="table-spinner w-4 h-4 border-2 border-gray-300 rounded-full mr-2"></div>Memuat...</div></td></tr>`; }
 
         function populateTable(tbodyEl, data, jenis, emptyMessage) {
             tbodyEl.innerHTML = '';
@@ -280,9 +285,7 @@
                 tbodyEl.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">${emptyMessage}</td></tr>`;
                 return;
             }
-
             const sortedData = [...data].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
             sortedData.forEach(transaction => {
                 const row = document.createElement('tr');
                 row.id = `trx-${transaction.id}`;
@@ -291,7 +294,8 @@
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${formatTanggal(transaction.tanggal)}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">${transaction.deskripsi}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${isPemasukan ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatRupiah(transaction.nominal)}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                    <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                        <button onclick="openEditModal('${transaction.id}')" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">Edit</button>
                         <button onclick="deleteTransaction('${transaction.id}', '${transaction.jenis}')" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">Hapus</button>
                     </td>
                 `;
@@ -302,20 +306,11 @@
         function renderTransactions() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const todayTransactions = allTransactions.filter(t => {
-                const transactionDate = new Date(t.tanggal);
-                transactionDate.setHours(0, 0, 0, 0);
-                return transactionDate.getTime() === today.getTime();
-            });
-            const pemasukanHariIni = todayTransactions.filter(t => t.jenis === 'pemasukan');
-            const pengeluaranHariIni = todayTransactions.filter(t => t.jenis === 'pengeluaran');
-            populateTable(pemasukanListTodayEl, pemasukanHariIni, 'pemasukan', 'Tidak ada pemasukan hari ini.');
-            populateTable(pengeluaranListTodayEl, pengeluaranHariIni, 'pengeluaran', 'Tidak ada pengeluaran hari ini.');
-
-            const semuaPemasukan = allTransactions.filter(t => t.jenis === 'pemasukan');
-            const semuaPengeluaran = allTransactions.filter(t => t.jenis === 'pengeluaran');
-            populateTable(pemasukanListAllEl, semuaPemasukan, 'pemasukan', 'Belum ada riwayat pemasukan.');
-            populateTable(pengeluaranListAllEl, semuaPengeluaran, 'pengeluaran', 'Belum ada riwayat pengeluaran.');
+            const todayTransactions = allTransactions.filter(t => new Date(t.tanggal).setHours(0,0,0,0) === today.getTime());
+            populateTable(pemasukanListTodayEl, todayTransactions.filter(t => t.jenis === 'pemasukan'), 'pemasukan', 'Tidak ada pemasukan hari ini.');
+            populateTable(pengeluaranListTodayEl, todayTransactions.filter(t => t.jenis === 'pengeluaran'), 'pengeluaran', 'Tidak ada pengeluaran hari ini.');
+            populateTable(pemasukanListAllEl, allTransactions.filter(t => t.jenis === 'pemasukan'), 'pemasukan', 'Belum ada riwayat pemasukan.');
+            populateTable(pengeluaranListAllEl, allTransactions.filter(t => t.jenis === 'pengeluaran'), 'pengeluaran', 'Belum ada riwayat pengeluaran.');
         }
 
         function updateSummary() {
@@ -340,10 +335,7 @@
                 updateSummary();
             } catch (error) {
                 const errorHtml = `<tr><td colspan="4" class="text-center p-4 text-red-600 text-sm">${error.message}</td></tr>`;
-                pemasukanListTodayEl.innerHTML = errorHtml;
-                pengeluaranListTodayEl.innerHTML = errorHtml;
-                pemasukanListAllEl.innerHTML = errorHtml;
-                pengeluaranListAllEl.innerHTML = errorHtml;
+                [pemasukanListTodayEl, pengeluaranListTodayEl, pemasukanListAllEl, pengeluaranListAllEl].forEach(el => el.innerHTML = errorHtml);
             }
         }
 
@@ -351,21 +343,9 @@
             e.preventDefault();
             submitBtn.disabled = true;
             submitBtn.textContent = 'Menyimpan...';
-
-            const newTransaction = {
-                action: 'add',
-                deskripsi: document.getElementById('deskripsi').value,
-                nominal: parseFloat(document.getElementById('nominal').value),
-                jenis: document.getElementById('jenis').value
-            };
-
+            const newTransaction = { action: 'add', deskripsi: document.getElementById('deskripsi').value, nominal: parseFloat(document.getElementById('nominal').value), jenis: document.getElementById('jenis').value };
             try {
-                await fetch(GOOGLE_SHEET_API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(newTransaction),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                });
+                await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(newTransaction), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 await fetchTransactions();
                 transactionForm.reset();
@@ -379,62 +359,70 @@
 
         async function deleteTransaction(id, jenis) {
             if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) return;
-            
-            const row = document.getElementById(`trx-${id}`);
-            row.classList.add('deleting');
+            document.getElementById(`trx-${id}`).classList.add('deleting');
             try {
-                await fetch(GOOGLE_SHEET_API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ action: 'delete', id: id, jenis: jenis }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                });
+                await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', id, jenis }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 await fetchTransactions();
             } catch (error) {
                 alert(`Gagal menghapus: ${error.message}`);
-                row.classList.remove('deleting');
+                document.getElementById(`trx-${id}`).classList.remove('deleting');
             }
         }
-        
+
+        function openEditModal(id) {
+            const transaction = allTransactions.find(t => t.id.toString() === id.toString());
+            if (transaction) {
+                editIdInput.value = transaction.id;
+                editJenisInput.value = transaction.jenis;
+                editDeskripsiInput.value = transaction.deskripsi;
+                editNominalInput.value = transaction.nominal;
+                editModal.classList.remove('hidden');
+            }
+        }
+
+        function closeEditModal() {
+            editModal.classList.add('hidden');
+        }
+
+        async function saveEdit() {
+            saveEditBtn.disabled = true;
+            saveEditBtn.textContent = 'Menyimpan...';
+            const updatedTransaction = { action: 'edit', id: editIdInput.value, jenis: editJenisInput.value, deskripsi: editDeskripsiInput.value, nominal: parseFloat(editNominalInput.value) };
+            try {
+                await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(updatedTransaction), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                closeEditModal();
+                await fetchTransactions();
+            } catch (error) {
+                alert(`Gagal memperbarui: ${error.message}`);
+            } finally {
+                saveEditBtn.disabled = false;
+                saveEditBtn.textContent = 'Simpan Perubahan';
+            }
+        }
+
         async function getAiAnalysis() {
             const apiKey = "AIzaSyA_KGVm0tVRGc6hG9rZmvvBpjRZnXfhP_Y";
-
             aiErrorMessage.classList.add('hidden');
-            
             if (allTransactions.length < 3) {
                 aiResultContainer.innerHTML = 'Mohon miliki minimal 3 transaksi (total) untuk analisis.';
                 return;
             }
-
             getAnalysisBtn.disabled = true;
             aiLoadingSpinner.classList.remove('hidden');
             btnText.textContent = 'Menganalisis...';
-            
             const formattedTransactions = allTransactions.map(t => `- ${t.jenis}: ${t.deskripsi} (${formatRupiah(t.nominal)})`).join('\n');
             const prompt = `Kamu adalah Xyli Asisten AI yang cerdas, ramah, dan serba bisa dari farizaladha. Anggap dirimu sebagai teman ngobrol yang asyik dan punya banyak pengetahuan. Kepribadian Anda suportif, dan sedikit edukatif. Fungsi utama Anda adalah konsultan bisnis. Berdasarkan data transaksi ini:\n${formattedTransactions}\n\nBerikan:\n1. Analisis singkat kondisi keuangan (maks 2 kalimat).\n2. Tiga (3) tips konkret dalam format daftar bernomor untuk meningkatkan usaha.\nSampaikan dengan bahasa yang santai dan mudah dipahami. Jangan gunakan markdown tebal atau miring.`;
-
             try {
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                 const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) throw new Error(`Permintaan API gagal.`);
-                
                 const result = await response.json();
-                
                 if (result.candidates && result.candidates[0]) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    aiResultContainer.innerHTML = text.replace(/\n/g, '<br>');
-                } else {
-                    throw new Error("Respons dari AI tidak valid.");
-                }
-
+                    aiResultContainer.innerHTML = result.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
+                } else { throw new Error("Respons dari AI tidak valid."); }
             } catch (error) {
                 aiErrorMessage.textContent = "Maaf, terjadi kesalahan saat menghubungi AI: " + error.message;
                 aiErrorMessage.classList.remove('hidden');
@@ -448,6 +436,8 @@
         document.addEventListener('DOMContentLoaded', fetchTransactions);
         transactionForm.addEventListener('submit', addTransaction);
         getAnalysisBtn.addEventListener('click', getAiAnalysis);
+        saveEditBtn.addEventListener('click', saveEdit);
+        cancelEditBtn.addEventListener('click', closeEditModal);
     </script>
 </body>
 </html>
