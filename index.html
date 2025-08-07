@@ -16,7 +16,6 @@
         .deleting { opacity: 0.5; pointer-events: none; }
     </style>
     <script>
-        // Konfigurasi Tailwind CSS untuk Dark Mode
         tailwind.config = {
             darkMode: 'class',
         }
@@ -189,7 +188,6 @@
         const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
         const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
-        // Cek tema dari localStorage atau preferensi sistem
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
             themeToggleLightIcon.classList.remove('hidden');
@@ -201,11 +199,8 @@
         const themeToggleBtn = document.getElementById('theme-toggle');
 
         themeToggleBtn.addEventListener('click', function() {
-            // Toggle ikon
             themeToggleDarkIcon.classList.toggle('hidden');
             themeToggleLightIcon.classList.toggle('hidden');
-
-            // Toggle tema
             if (localStorage.getItem('color-theme')) {
                 if (localStorage.getItem('color-theme') === 'light') {
                     document.documentElement.classList.add('dark');
@@ -400,24 +395,31 @@
             const prompt = `Anda adalah seorang konsultan bisnis UMKM di Indonesia. Berdasarkan data transaksi ini:\n${formattedTransactions}\n\nBerikan:\n1. Analisis singkat kondisi keuangan (maks 2 kalimat).\n2. Tiga (3) tips konkret dalam format daftar bernomor untuk meningkatkan usaha.\nSampaikan dengan bahasa yang positif dan mudah dipahami. Jangan gunakan markdown tebal atau miring.`;
 
             try {
-                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                const response = await fetch(apiUrl, {
+                // --- PERUBAHAN UTAMA DI SINI ---
+                // Kirim permintaan ke Google Apps Script sebagai proxy
+                const payload = { 
+                    action: 'getAiAnalysis',
+                    prompt: prompt 
+                };
+                
+                const response = await fetch(GOOGLE_SHEET_API_URL, {
                     method: 'POST',
+                    body: JSON.stringify(payload),
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
                 });
-                if (!response.ok) throw new Error(`API request failed`);
+                
+                if (!response.ok) throw new Error(`Permintaan ke proxy gagal.`);
+                
                 const result = await response.json();
-                if (result.candidates && result.candidates[0]) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    aiResultContainer.innerHTML = text.replace(/\n/g, '<br>');
+                
+                if (result.status === 'success') {
+                    aiResultContainer.innerHTML = result.text.replace(/\n/g, '<br>');
                 } else {
-                    throw new Error("Respons dari AI tidak valid.");
+                    throw new Error(result.message || "Respons dari proxy tidak valid.");
                 }
+
             } catch (error) {
-                aiErrorMessage.textContent = "Maaf, terjadi kesalahan saat menghubungi AI.";
+                aiErrorMessage.textContent = "Maaf, terjadi kesalahan saat menghubungi AI: " + error.message;
                 aiErrorMessage.classList.remove('hidden');
             } finally {
                 getAnalysisBtn.disabled = false;
