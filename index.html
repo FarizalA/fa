@@ -14,6 +14,23 @@
         .spinner, .table-spinner { border-top-color: #4f46e5; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .deleting { opacity: 0.5; pointer-events: none; }
+
+        /* --- Gaya Scrollbar Transparan --- */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.3); /* Abu-abu semi-transparan */
+            border-radius: 20px;
+            border: 3px solid transparent;
+            background-clip: content-box;
+        }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5); /* Lebih terlihat saat di-hover */
+        }
     </style>
     <script>
         tailwind.config = {
@@ -106,7 +123,7 @@
                     <!-- Kolom Pemasukan Hari Ini -->
                     <div>
                         <h3 class="text-lg font-medium text-green-700 dark:text-green-400 mb-3">Pemasukan</h3>
-                        <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
@@ -123,7 +140,7 @@
                     <!-- Kolom Pengeluaran Hari Ini -->
                     <div>
                         <h3 class="text-lg font-medium text-red-700 dark:text-red-400 mb-3">Pengeluaran</h3>
-                        <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
@@ -147,7 +164,7 @@
                     <!-- Kolom Semua Pemasukan -->
                     <div>
                         <h3 class="text-lg font-medium text-green-700 dark:text-green-400 mb-3">Pemasukan</h3>
-                        <div class="overflow-y-auto max-h-80 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div class="overflow-y-auto max-h-80 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
@@ -164,7 +181,7 @@
                     <!-- Kolom Semua Pengeluaran -->
                     <div>
                         <h3 class="text-lg font-medium text-red-700 dark:text-red-400 mb-3">Pengeluaran</h3>
-                        <div class="overflow-y-auto max-h-80 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div class="overflow-y-auto max-h-80 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
