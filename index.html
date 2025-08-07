@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,32 +15,45 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .deleting { opacity: 0.5; pointer-events: none; }
     </style>
+    <script>
+        // Konfigurasi Tailwind CSS untuk Dark Mode
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
     <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
         
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Catatan Ku</h1>
-            <p class="text-gray-600 mt-2">Hay Selamat Datang</p>
+        <header class="relative text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Catatan Ku</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Hay Selamat Datang</p>
+            <!-- Tombol Dark Mode Toggle -->
+            <div class="absolute top-0 right-0">
+                <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05A1 1 0 003.636 6.464l.707.707a1 1 0 001.414-1.414l-.707-.707zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
         </header>
 
         <main>
             <!-- Ringkasan Saldo (Keseluruhan) -->
-            <section id="saldo-section" class="bg-white p-6 rounded-xl shadow-md mb-8">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Ringkasan Keuangan (Total)</h2>
+            <section id="saldo-section" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Ringkasan Keuangan (Total)</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                    <div class="bg-green-100 p-4 rounded-lg">
-                        <p class="text-sm text-green-700 font-medium">Total Pemasukan</p>
-                        <p id="total-pemasukan" class="text-2xl font-bold text-green-800">Rp 0</p>
+                    <div class="bg-green-100 dark:bg-green-900/50 p-4 rounded-lg">
+                        <p class="text-sm text-green-700 dark:text-green-300 font-medium">Total Pemasukan</p>
+                        <p id="total-pemasukan" class="text-2xl font-bold text-green-800 dark:text-green-200">Rp 0</p>
                     </div>
-                    <div class="bg-red-100 p-4 rounded-lg">
-                        <p class="text-sm text-red-700 font-medium">Total Pengeluaran</p>
-                        <p id="total-pengeluaran" class="text-2xl font-bold text-red-800">Rp 0</p>
+                    <div class="bg-red-100 dark:bg-red-900/50 p-4 rounded-lg">
+                        <p class="text-sm text-red-700 dark:text-red-300 font-medium">Total Pengeluaran</p>
+                        <p id="total-pengeluaran" class="text-2xl font-bold text-red-800 dark:text-red-200">Rp 0</p>
                     </div>
-                    <div class="bg-blue-100 p-4 rounded-lg">
-                        <p class="text-sm text-blue-700 font-medium">Saldo Akhir</p>
-                        <p id="saldo-akhir" class="text-2xl font-bold text-blue-800">Rp 0</p>
+                    <div class="bg-blue-100 dark:bg-blue-900/50 p-4 rounded-lg">
+                        <p class="text-sm text-blue-700 dark:text-blue-300 font-medium">Saldo Akhir</p>
+                        <p id="saldo-akhir" class="text-2xl font-bold text-blue-800 dark:text-blue-200">Rp 0</p>
                     </div>
                 </div>
             </section>
@@ -48,20 +61,20 @@
             <!-- Form dan Analisis AI -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <!-- Form Input Transaksi -->
-                <section id="form-section" class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Tambah Transaksi Baru</h2>
+                <section id="form-section" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Tambah Transaksi Baru</h2>
                     <form id="transaction-form" class="space-y-4">
                         <div>
-                            <label for="deskripsi" class="block text-sm font-medium text-gray-600">Deskripsi</label>
-                            <input type="text" id="deskripsi" placeholder="Contoh: Penjualan produk A" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm" required>
+                            <label for="deskripsi" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Deskripsi</label>
+                            <input type="text" id="deskripsi" placeholder="Contoh: Penjualan produk A" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-900 dark:text-gray-200" required>
                         </div>
                         <div>
-                            <label for="nominal" class="block text-sm font-medium text-gray-600">Nominal (Rp)</label>
-                            <input type="number" id="nominal" placeholder="Contoh: 50000" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm" required>
+                            <label for="nominal" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Nominal (Rp)</label>
+                            <input type="number" id="nominal" placeholder="Contoh: 50000" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-900 dark:text-gray-200" required>
                         </div>
                         <div>
-                            <label for="jenis" class="block text-sm font-medium text-gray-600">Jenis Transaksi</label>
-                            <select id="jenis" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                            <label for="jenis" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Jenis Transaksi</label>
+                            <select id="jenis" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-900 dark:text-gray-200">
                                 <option value="pemasukan">Pemasukan</option>
                                 <option value="pengeluaran">Pengeluaran</option>
                             </select>
@@ -74,10 +87,10 @@
                     </form>
                 </section>
                 <!-- Analisis AI -->
-                <section id="ai-analysis-section" class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Analisis Keuangan Cerdas ✨</h2>
-                    <div id="ai-result-container" class="bg-indigo-50 p-4 rounded-lg min-h-[150px] prose max-w-none">Klik tombol untuk mendapatkan analisis dari AI.</div>
-                    <div id="ai-error-message" class="hidden bg-red-100 text-red-700 p-4 rounded-lg my-4"></div>
+                <section id="ai-analysis-section" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                    <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Analisis Keuangan Cerdas ✨</h2>
+                    <div id="ai-result-container" class="bg-indigo-50 dark:bg-gray-700/50 p-4 rounded-lg min-h-[150px] prose max-w-none dark:text-gray-300">Klik tombol untuk mendapatkan analisis dari AI.</div>
+                    <div id="ai-error-message" class="hidden bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 p-4 rounded-lg my-4"></div>
                     <div class="text-center mt-4">
                         <button id="get-analysis-btn" class="inline-flex items-center justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
                             <span id="btn-text">Dapatkan Analisis</span>
@@ -88,40 +101,40 @@
             </div>
 
             <!-- Riwayat Transaksi Hari Ini -->
-            <section id="history-section-today" class="bg-white p-6 rounded-xl shadow-md mb-8">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Riwayat Transaksi Hari Ini</h2>
+            <section id="history-section-today" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Riwayat Transaksi Hari Ini</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Kolom Pemasukan Hari Ini -->
                     <div>
-                        <h3 class="text-lg font-medium text-green-700 mb-3">Pemasukan</h3>
-                        <div class="overflow-y-auto max-h-64 border rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50 sticky top-0">
+                        <h3 class="text-lg font-medium text-green-700 dark:text-green-400 mb-3">Pemasukan</h3>
+                        <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nominal</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
                                         <th class="relative px-4 py-2"><span class="sr-only">Hapus</span></th>
                                     </tr>
                                 </thead>
-                                <tbody id="pemasukan-list-today" class="bg-white divide-y divide-gray-200"></tbody>
+                                <tbody id="pemasukan-list-today" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
                     <!-- Kolom Pengeluaran Hari Ini -->
                     <div>
-                        <h3 class="text-lg font-medium text-red-700 mb-3">Pengeluaran</h3>
-                        <div class="overflow-y-auto max-h-64 border rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50 sticky top-0">
+                        <h3 class="text-lg font-medium text-red-700 dark:text-red-400 mb-3">Pengeluaran</h3>
+                        <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nominal</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
                                         <th class="relative px-4 py-2"><span class="sr-only">Hapus</span></th>
                                     </tr>
                                 </thead>
-                                <tbody id="pengeluaran-list-today" class="bg-white divide-y divide-gray-200"></tbody>
+                                <tbody id="pengeluaran-list-today" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
@@ -129,40 +142,40 @@
             </section>
 
             <!-- Semua Riwayat Transaksi -->
-            <section id="history-section-all" class="bg-white p-6 rounded-xl shadow-md">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Semua Riwayat Transaksi</h2>
+            <section id="history-section-all" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Semua Riwayat Transaksi</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Kolom Semua Pemasukan -->
                     <div>
-                        <h3 class="text-lg font-medium text-green-700 mb-3">Pemasukan</h3>
-                        <div class="overflow-y-auto max-h-80 border rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50 sticky top-0">
+                        <h3 class="text-lg font-medium text-green-700 dark:text-green-400 mb-3">Pemasukan</h3>
+                        <div class="overflow-y-auto max-h-80 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nominal</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
                                         <th class="relative px-4 py-2"><span class="sr-only">Hapus</span></th>
                                     </tr>
                                 </thead>
-                                <tbody id="pemasukan-list-all" class="bg-white divide-y divide-gray-200"></tbody>
+                                <tbody id="pemasukan-list-all" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
                     <!-- Kolom Semua Pengeluaran -->
                     <div>
-                        <h3 class="text-lg font-medium text-red-700 mb-3">Pengeluaran</h3>
-                        <div class="overflow-y-auto max-h-80 border rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50 sticky top-0">
+                        <h3 class="text-lg font-medium text-red-700 dark:text-red-400 mb-3">Pengeluaran</h3>
+                        <div class="overflow-y-auto max-h-80 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nominal</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
                                         <th class="relative px-4 py-2"><span class="sr-only">Hapus</span></th>
                                     </tr>
                                 </thead>
-                                <tbody id="pengeluaran-list-all" class="bg-white divide-y divide-gray-200"></tbody>
+                                <tbody id="pengeluaran-list-all" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
@@ -172,6 +185,47 @@
     </div>
 
     <script>
+        // --- DARK MODE SCRIPT ---
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // Cek tema dari localStorage atau preferensi sistem
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        const themeToggleBtn = document.getElementById('theme-toggle');
+
+        themeToggleBtn.addEventListener('click', function() {
+            // Toggle ikon
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            // Toggle tema
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+
+        // --- APPLICATION SCRIPT ---
         const GOOGLE_SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxorfRq7bYC5rtP1e3yZZPpvzPtpXuTqrJ47COBAQaQV6tMDk5XDJ97aK5qEB2ZbuCJ/exec';
         
         const transactionForm = document.getElementById('transaction-form');
@@ -201,18 +255,17 @@
             if (!isoString) return '';
             const date = new Date(isoString);
             const options = { day: '2-digit', month: 'short', year: '2-digit' };
-            // Menggunakan 'id-ID' untuk format lokal Indonesia (misal: 07 Agu 25)
             return date.toLocaleDateString('id-ID', options).replace(/\./g, '');
         }
 
         function showTableLoading(tbody) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4"><div class="flex justify-center items-center text-sm text-gray-500"><div class="table-spinner w-4 h-4 border-2 border-gray-300 rounded-full mr-2"></div>Memuat...</div></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4"><div class="flex justify-center items-center text-sm text-gray-500 dark:text-gray-400"><div class="table-spinner w-4 h-4 border-2 border-gray-300 rounded-full mr-2"></div>Memuat...</div></td></tr>`;
         }
 
         function populateTable(tbodyEl, data, jenis, emptyMessage) {
             tbodyEl.innerHTML = '';
             if (data.length === 0) {
-                tbodyEl.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-sm text-gray-500">${emptyMessage}</td></tr>`;
+                tbodyEl.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">${emptyMessage}</td></tr>`;
                 return;
             }
 
@@ -223,11 +276,11 @@
                 row.id = `trx-${transaction.id}`;
                 const isPemasukan = transaction.jenis === 'pemasukan';
                 row.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formatTanggal(transaction.tanggal)}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${transaction.deskripsi}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${isPemasukan ? 'text-green-600' : 'text-red-600'}">${formatRupiah(transaction.nominal)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${formatTanggal(transaction.tanggal)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">${transaction.deskripsi}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${isPemasukan ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatRupiah(transaction.nominal)}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="deleteTransaction('${transaction.id}', '${transaction.jenis}')" class="text-red-600 hover:text-red-900">Hapus</button>
+                        <button onclick="deleteTransaction('${transaction.id}', '${transaction.jenis}')" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">Hapus</button>
                     </td>
                 `;
                 tbodyEl.appendChild(row);
