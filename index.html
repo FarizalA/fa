@@ -27,7 +27,6 @@
         }
         .dark .filter-btn-active { background-color: #3b82f6 !important; }
 
-        /* Latar Belakang 3D Canvas */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -37,7 +36,6 @@
             z-index: -1;
         }
 
-        /* Efek Glassmorphism */
         .glassmorphism {
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
@@ -47,19 +45,37 @@
             background: rgba(30, 41, 59, 0.5);
         }
 
-        /* Animasi Fade-in dan Slide-up */
         @keyframes fadeInSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-slide-up {
             animation: fadeInSlideUp 0.7s ease-out forwards;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+        .bounce-dot {
+            width: 1rem;
+            height: 1rem;
+            background-color: #3b82f6;
+            border-radius: 100%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .bounce-1 { animation-delay: -0.32s; }
+        .bounce-2 { animation-delay: -0.16s; }
+        .bounce-3 { animation-delay: 0s; }
+        
+        @keyframes new-entry-animation {
+            from { background-color: rgba(59, 130, 246, 0.3); transform: translateX(-10px); opacity: 0; }
+            to { background-color: transparent; transform: translateX(0); opacity: 1; }
+        }
+        .new-entry {
+            animation: new-entry-animation 0.8s ease-out;
         }
     </style>
     <script>
@@ -68,6 +84,15 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
     
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center z-50 transition-opacity duration-500 ease-out">
+        <div class="flex space-x-2">
+            <div class="bounce-dot bounce-1"></div>
+            <div class="bounce-dot bounce-2"></div>
+            <div class="bounce-dot bounce-3"></div>
+        </div>
+        <p class="mt-4 text-slate-600 dark:text-slate-300 text-lg">Memuat data...</p>
+    </div>
+
     <canvas id="bg-canvas"></canvas>
 
     <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl relative z-10">
@@ -125,19 +150,21 @@
                             </select>
                         </div>
                         <div class="text-right pt-2">
-                            <button type="submit" id="submit-btn" class="inline-flex items-center justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <button type="submit" id="submit-btn" class="inline-flex items-center justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active:scale-95 transition-transform">
                                 Simpan Transaksi
                             </button>
                         </div>
                     </form>
                 </section>
                 <section id="ai-analysis-section" class="lg:col-span-2 glassmorphism p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 flex flex-col">
-                    <h2 class="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-4">Analisis Keuangan Cerdas ✨</h2>
-                    <div id="ai-result-container" class="bg-blue-500/10 dark:bg-slate-700/50 p-4 rounded-lg flex-grow prose prose-sm max-w-none dark:text-slate-300">Klik tombol untuk mendapatkan analisis dari AI.</div>
+                    <h2 class="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-4">Analisis & Wawasan ✨</h2>
+                    <div id="ai-result-container" class="bg-blue-500/10 dark:bg-slate-700/50 p-4 rounded-lg flex-grow prose prose-sm max-w-none dark:text-slate-300">
+                        <!-- Konten Wawasan dan Analisis AI akan muncul di sini -->
+                    </div>
                     <div id="ai-error-message" class="hidden bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 p-4 rounded-lg my-4"></div>
                     <div class="text-center mt-4">
-                        <button id="get-analysis-btn" class="w-full inline-flex items-center justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <span id="btn-text">Dapatkan Analisis</span>
+                        <button id="get-analysis-btn" class="w-full inline-flex items-center justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active:scale-95 transition-transform">
+                            <span id="btn-text">Dapatkan Analisis AI Lengkap</span>
                             <div id="ai-loading-spinner" class="hidden spinner w-5 h-5 border-4 border-white rounded-full ml-2"></div>
                         </button>
                     </div>
@@ -149,9 +176,9 @@
                     <div>
                         <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-3">Filter Transaksi</h3>
                         <div class="flex flex-wrap gap-2 mb-3">
-                            <button onclick="filterTransactions('today')" id="filter-today" class="filter-btn-active px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200">Hari Ini</button>
-                            <button onclick="filterTransactions('week')" id="filter-week" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200">Minggu Ini</button>
-                            <button onclick="filterTransactions('month')" id="filter-month" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200">Bulan Ini</button>
+                            <button onclick="filterTransactions('today')" id="filter-today" class="filter-btn-active px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200 active:scale-95 transition-transform">Hari Ini</button>
+                            <button onclick="filterTransactions('week')" id="filter-week" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200 active:scale-95 transition-transform">Minggu Ini</button>
+                            <button onclick="filterTransactions('month')" id="filter-month" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200 active:scale-95 transition-transform">Bulan Ini</button>
                         </div>
                         <div class="flex items-end gap-2">
                             <div>
@@ -162,7 +189,7 @@
                                 <label for="end-date" class="text-sm text-slate-600 dark:text-slate-400">Sampai</label>
                                 <input type="date" id="end-date" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md dark:bg-slate-700 focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            <button onclick="filterTransactions('custom')" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">Filter</button>
+                            <button onclick="filterTransactions('custom')" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md active:scale-95 transition-transform">Filter</button>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
@@ -173,11 +200,11 @@
                         <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg text-center flex flex-col justify-center border border-slate-200 dark:border-slate-700">
                             <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-3">Ekspor Laporan</h3>
                             <div class="space-y-2">
-                                <button onclick="exportToPDF()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md">
+                                <button onclick="exportToPDF()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md active:scale-95 transition-transform">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
                                     PDF
                                 </button>
-                                <button onclick="exportToCSV()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md">
+                                <button onclick="exportToCSV()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md active:scale-95 transition-transform">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0V15a2.5 2.5 0 0 1-5 0Z"/><path d="M7 12.5a2.5 2.5 0 0 1 5 0V15a2.5 2.5 0 0 1-5 0Z"/></svg>
                                     CSV
                                 </button>
@@ -304,7 +331,6 @@
             particles.rotation.x += 0.0005;
             particles.rotation.y += 0.0005;
             
-            // Interaksi mouse
             camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
             camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
             camera.lookAt(scene.position);
@@ -378,6 +404,7 @@
         let allTransactions = [];
         let filteredTransactions = [];
         let financeChart;
+        let lastAddedId = null;
 
         function formatRupiah(angka) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka); }
         function formatTanggal(isoString) { if (!isoString) return ''; const date = new Date(isoString); const options = { day: '2-digit', month: 'short', year: '2-digit' }; return date.toLocaleDateString('id-ID', options).replace(/\./g, ''); }
@@ -393,18 +420,22 @@
             sortedData.forEach(transaction => {
                 const row = document.createElement('tr');
                 row.id = `trx-${transaction.id}`;
+                if (transaction.id === lastAddedId) {
+                    row.classList.add('new-entry');
+                }
                 const isPemasukan = transaction.jenis === 'pemasukan';
                 row.innerHTML = `
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">${formatTanggal(transaction.tanggal)}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-800 dark:text-slate-200">${transaction.deskripsi}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${isPemasukan ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${formatRupiah(transaction.nominal)}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <button onclick="openEditModal('${transaction.id}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">Edit</button>
-                        <button onclick="deleteTransaction('${transaction.id}', '${transaction.jenis}')" class="text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300">Hapus</button>
+                        <button onclick="openEditModal('${transaction.id}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-transform active:scale-90">Edit</button>
+                        <button onclick="deleteTransaction('${transaction.id}', '${transaction.jenis}')" class="text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300 transition-transform active:scale-90">Hapus</button>
                     </td>
                 `;
                 tbodyEl.appendChild(row);
             });
+            lastAddedId = null;
         }
 
         function renderFilteredTransactions() {
@@ -413,19 +444,37 @@
             populateTable(pemasukanListEl, pemasukan, 'pemasukan', 'Tidak ada pemasukan pada periode ini.');
             populateTable(pengeluaranListEl, pengeluaran, 'pengeluaran', 'Tidak ada pengeluaran pada periode ini.');
             renderChart();
+            generateInsights();
+        }
+
+        function animateCountUp(element, endValue) {
+            let startValue = 0;
+            const duration = 1500;
+            const startTime = performance.now();
+            function update(currentTime) {
+                const elapsedTime = currentTime - startTime;
+                if (elapsedTime > duration) {
+                    element.textContent = formatRupiah(endValue);
+                    return;
+                }
+                const progress = elapsedTime / duration;
+                const currentValue = startValue + (endValue - startValue) * progress;
+                element.textContent = formatRupiah(currentValue);
+                requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
         }
 
         function updateSummary() {
             const pemasukan = allTransactions.filter(t => t.jenis === 'pemasukan').reduce((acc, t) => acc + t.nominal, 0);
             const pengeluaran = allTransactions.filter(t => t.jenis === 'pengeluaran').reduce((acc, t) => acc + t.nominal, 0);
-            saldoAkhirEl.textContent = formatRupiah(pemasukan - pengeluaran);
-            totalPemasukanEl.textContent = formatRupiah(pemasukan);
-            totalPengeluaranEl.textContent = formatRupiah(pengeluaran);
+            const saldo = pemasukan - pengeluaran;
+            animateCountUp(totalPemasukanEl, pemasukan);
+            animateCountUp(totalPengeluaranEl, pengeluaran);
+            animateCountUp(saldoAkhirEl, saldo);
         }
         
         async function fetchTransactions() {
-            showTableLoading(pemasukanListEl);
-            showTableLoading(pengeluaranListEl);
             try {
                 const response = await fetch(GOOGLE_SHEET_API_URL);
                 if (!response.ok) throw new Error('Gagal mengambil data dari Google Sheets.');
@@ -436,6 +485,12 @@
                 const errorHtml = `<tr><td colspan="4" class="text-center p-4 text-rose-600 text-sm">${error.message}</td></tr>`;
                 pemasukanListEl.innerHTML = errorHtml;
                 pengeluaranListEl.innerHTML = errorHtml;
+            } finally {
+                const loadingOverlay = document.getElementById('loading-overlay');
+                loadingOverlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                }, 500);
             }
         }
 
@@ -528,12 +583,17 @@
             e.preventDefault();
             submitBtn.disabled = true;
             submitBtn.textContent = 'Menyimpan...';
-            const newTransaction = { action: 'add', deskripsi: document.getElementById('deskripsi').value, nominal: parseFloat(document.getElementById('nominal').value), jenis: document.getElementById('jenis').value };
+            const newTransactionData = { action: 'add', deskripsi: document.getElementById('deskripsi').value, nominal: parseFloat(document.getElementById('nominal').value), jenis: document.getElementById('jenis').value };
             try {
-                await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(newTransaction), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(newTransactionData), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 await new Promise(resolve => setTimeout(resolve, 1500));
-                await fetchTransactions();
+                const tempId = Date.now();
+                lastAddedId = tempId;
+                allTransactions.push({ id: tempId, tanggal: new Date().toISOString(), ...newTransactionData });
+                updateSummary();
+                filterTransactions(document.querySelector('.filter-btn-active').id.replace('filter-', ''));
                 document.getElementById('transaction-form').reset();
+                fetchTransactions();
             } catch (error) {
                 alert(`Gagal menyimpan: ${error.message}`);
             } finally {
@@ -586,18 +646,47 @@
                 saveEditBtn.textContent = 'Simpan Perubahan';
             }
         }
+        
+        function generateInsights() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayTransactions = allTransactions.filter(t => new Date(t.tanggal).setHours(0,0,0,0) === today.getTime());
 
+            if (todayTransactions.length === 0) {
+                aiResultContainer.innerHTML = `<p class="flex items-center justify-center h-full">Belum ada aktivitas hari ini. Ayo mulai catat transaksi pertamamu!</p>`;
+                return;
+            }
+
+            const todayPemasukan = todayTransactions.filter(t => t.jenis === 'pemasukan');
+            const todayPengeluaran = todayTransactions.filter(t => t.jenis === 'pengeluaran');
+
+            let insights = [];
+            insights.push(`Hari ini kamu telah mencatat <strong>${todayTransactions.length} transaksi</strong>. Kerja bagus!`);
+
+            if (todayPemasukan.length > 0) {
+                const maxPemasukan = todayPemasukan.reduce((max, t) => t.nominal > max.nominal ? t : max, todayPemasukan[0]);
+                insights.push(`Pemasukan terbesarmu hari ini dari <strong>"${maxPemasukan.deskripsi}"</strong> sebesar <strong>${formatRupiah(maxPemasukan.nominal)}</strong>.`);
+            }
+
+            if (todayPengeluaran.length > 0) {
+                const maxPengeluaran = todayPengeluaran.reduce((max, t) => t.nominal > max.nominal ? t : max, todayPengeluaran[0]);
+                insights.push(`Pengeluaran terbesarmu hari ini untuk <strong>"${maxPengeluaran.deskripsi}"</strong> sebesar <strong>${formatRupiah(maxPengeluaran.nominal)}</strong>.`);
+            }
+
+            const randomInsight = insights[Math.floor(Math.random() * insights.length)];
+            aiResultContainer.innerHTML = `<p>${randomInsight}</p>`;
+        }
+        
         async function getAiAnalysis() {
             const apiKey = "AIzaSyA_KGVm0tVRGc6hG9rZmvvBpjRZnXfhP_Y";
-            const aiErrorMessage = document.getElementById('ai-error-message');
             aiErrorMessage.classList.add('hidden');
             if (allTransactions.length < 3) {
                 aiResultContainer.innerHTML = 'Mohon miliki minimal 3 transaksi (total) untuk analisis.';
                 return;
             }
             getAnalysisBtn.disabled = true;
-            document.getElementById('ai-loading-spinner').classList.remove('hidden');
-            document.getElementById('btn-text').textContent = 'Menganalisis...';
+            aiLoadingSpinner.classList.remove('hidden');
+            btnText.textContent = 'Menganalisis...';
             const formattedTransactions = allTransactions.map(t => `- ${t.jenis}: ${t.deskripsi} (${formatRupiah(t.nominal)})`).join('\n');
             const prompt = `Kamu adalah Xyli Asisten AI yang cerdas, ramah, dan serba bisa dari farizaladha. Anggap dirimu sebagai teman ngobrol yang asyik dan punya banyak pengetahuan. Kepribadian Anda suportif, dan sedikit edukatif. Fungsi utama Anda adalah konsultan bisnis. Berdasarkan data transaksi ini:\n${formattedTransactions}\n\nBerikan:\n1. Analisis singkat kondisi keuangan (maks 2 kalimat).\n2. Tiga (3) tips konkret dalam format daftar bernomor untuk meningkatkan usaha.\nSampaikan dengan bahasa yang santai dan mudah dipahami. Jangan gunakan markdown tebal atau miring.`;
             try {
@@ -607,20 +696,20 @@
                 if (!response.ok) throw new Error(`Permintaan API gagal.`);
                 const result = await response.json();
                 if (result.candidates && result.candidates[0]) {
-                    document.getElementById('ai-result-container').innerHTML = result.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
+                    aiResultContainer.innerHTML = result.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
                 } else { throw new Error("Respons dari AI tidak valid."); }
             } catch (error) {
                 aiErrorMessage.textContent = "Maaf, terjadi kesalahan saat menghubungi AI: " + error.message;
                 aiErrorMessage.classList.remove('hidden');
             } finally {
                 getAnalysisBtn.disabled = false;
-                document.getElementById('ai-loading-spinner').classList.add('hidden');
-                document.getElementById('btn-text').textContent = 'Dapatkan Analisis';
+                aiLoadingSpinner.classList.add('hidden');
+                btnText.textContent = 'Dapatkan Analisis AI Lengkap';
             }
         }
         
         document.addEventListener('DOMContentLoaded', fetchTransactions);
-        document.getElementById('transaction-form').addEventListener('submit', addTransaction);
+        transactionForm.addEventListener('submit', addTransaction);
         getAnalysisBtn.addEventListener('click', getAiAnalysis);
         saveEditBtn.addEventListener('click', saveEdit);
         cancelEditBtn.addEventListener('click', closeEditModal);
