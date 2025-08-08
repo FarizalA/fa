@@ -6,6 +6,10 @@
     <title>Catatan Ku</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Library untuk Grafik (Chart.js) dan Ekspor PDF (jsPDF) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .prose p { margin-bottom: 0.5rem; }
@@ -18,6 +22,7 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.3); border-radius: 20px; border: 3px solid transparent; background-clip: content-box; }
         .custom-scrollbar:hover::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); }
+        .filter-btn-active { background-color: #4f46e5 !important; color: white !important; }
     </style>
     <script>
         tailwind.config = { darkMode: 'class' }
@@ -39,9 +44,8 @@
         </header>
 
         <main>
-            <!-- Sections remain the same -->
             <section id="saldo-section" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Ringkasan Keuangan (Total)</h2>
+                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Ringkasan Keuangan (Total Keseluruhan)</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                     <div class="bg-green-100 dark:bg-green-900/50 p-4 rounded-lg">
                         <p class="text-sm text-green-700 dark:text-green-300 font-medium">Total Pemasukan</p>
@@ -97,46 +101,48 @@
                 </section>
             </div>
 
-            <section id="history-section-today" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Riwayat Transaksi Hari Ini</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Panel Kontrol Filter dan Ekspor -->
+            <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                    <!-- Filter -->
                     <div>
-                        <h3 class="text-lg font-medium text-green-700 dark:text-green-400 mb-3">Pemasukan</h3>
-                        <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
-                                        <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pemasukan-list-today" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                            </table>
+                        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Filter Transaksi</h3>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <button onclick="filterTransactions('today')" id="filter-today" class="filter-btn-active px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded-md">Hari Ini</button>
+                            <button onclick="filterTransactions('week')" id="filter-week" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded-md">Minggu Ini</button>
+                            <button onclick="filterTransactions('month')" id="filter-month" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded-md">Bulan Ini</button>
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <div>
+                                <label for="start-date" class="text-sm text-gray-600 dark:text-gray-400">Dari</label>
+                                <input type="date" id="start-date" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                            </div>
+                            <div>
+                                <label for="end-date" class="text-sm text-gray-600 dark:text-gray-400">Sampai</label>
+                                <input type="date" id="end-date" class="mt-1 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700">
+                            </div>
+                            <button onclick="filterTransactions('custom')" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">Filter</button>
                         </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-medium text-red-700 dark:text-red-400 mb-3">Pengeluaran</h3>
-                        <div class="overflow-y-auto max-h-64 border border-gray-200 dark:border-gray-700 rounded-lg custom-scrollbar">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Deskripsi</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
-                                        <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pengeluaran-list-today" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                            </table>
+                    <!-- Ekspor & Grafik -->
+                    <div class="grid grid-cols-2 gap-4">
+                         <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg text-center">
+                            <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Grafik Periode</h3>
+                            <div class="h-32 w-32 mx-auto"><canvas id="finance-chart"></canvas></div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg text-center flex flex-col justify-center">
+                            <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Ekspor Laporan</h3>
+                            <div class="space-y-2">
+                                <button onclick="exportToPDF()" class="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md">Ekspor PDF</button>
+                                <button onclick="exportToCSV()" class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md">Ekspor CSV</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="history-section-all" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Semua Riwayat Transaksi</h2>
+            <section id="history-section-filtered" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Riwayat Transaksi <span id="filter-period-label" class="text-indigo-600 dark:text-indigo-400">Hari Ini</span></h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <h3 class="text-lg font-medium text-green-700 dark:text-green-400 mb-3">Pemasukan</h3>
@@ -150,7 +156,7 @@
                                         <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
                                     </tr>
                                 </thead>
-                                <tbody id="pemasukan-list-all" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                                <tbody id="pemasukan-list" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
@@ -166,7 +172,7 @@
                                         <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
                                     </tr>
                                 </thead>
-                                <tbody id="pengeluaran-list-all" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                                <tbody id="pengeluaran-list" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
@@ -210,7 +216,6 @@
         // --- DARK MODE SCRIPT ---
         const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
         const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
             themeToggleLightIcon.classList.remove('hidden');
@@ -218,9 +223,7 @@
             document.documentElement.classList.remove('dark');
             themeToggleDarkIcon.classList.remove('hidden');
         }
-
         const themeToggleBtn = document.getElementById('theme-toggle');
-
         themeToggleBtn.addEventListener('click', function() {
             themeToggleDarkIcon.classList.toggle('hidden');
             themeToggleLightIcon.classList.toggle('hidden');
@@ -252,10 +255,9 @@
         const totalPengeluaranEl = document.getElementById('total-pengeluaran');
         const saldoAkhirEl = document.getElementById('saldo-akhir');
         
-        const pemasukanListTodayEl = document.getElementById('pemasukan-list-today');
-        const pengeluaranListTodayEl = document.getElementById('pengeluaran-list-today');
-        const pemasukanListAllEl = document.getElementById('pemasukan-list-all');
-        const pengeluaranListAllEl = document.getElementById('pengeluaran-list-all');
+        const pemasukanListEl = document.getElementById('pemasukan-list');
+        const pengeluaranListEl = document.getElementById('pengeluaran-list');
+        const filterPeriodLabel = document.getElementById('filter-period-label');
 
         const getAnalysisBtn = document.getElementById('get-analysis-btn');
         const aiResultContainer = document.getElementById('ai-result-container');
@@ -263,17 +265,17 @@
         const btnText = document.getElementById('btn-text');
         const aiErrorMessage = document.getElementById('ai-error-message');
         
-        // Edit Modal Elements
         const editModal = document.getElementById('edit-modal');
-        const editForm = document.getElementById('edit-form');
         const saveEditBtn = document.getElementById('save-edit-btn');
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
         const editIdInput = document.getElementById('edit-id');
         const editJenisInput = document.getElementById('edit-jenis');
         const editDeskripsiInput = document.getElementById('edit-deskripsi');
         const editNominalInput = document.getElementById('edit-nominal');
-
+        
         let allTransactions = [];
+        let filteredTransactions = [];
+        let financeChart;
 
         function formatRupiah(angka) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka); }
         function formatTanggal(isoString) { if (!isoString) return ''; const date = new Date(isoString); const options = { day: '2-digit', month: 'short', year: '2-digit' }; return date.toLocaleDateString('id-ID', options).replace(/\./g, ''); }
@@ -303,40 +305,121 @@
             });
         }
 
-        function renderTransactions() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const todayTransactions = allTransactions.filter(t => new Date(t.tanggal).setHours(0,0,0,0) === today.getTime());
-            populateTable(pemasukanListTodayEl, todayTransactions.filter(t => t.jenis === 'pemasukan'), 'pemasukan', 'Tidak ada pemasukan hari ini.');
-            populateTable(pengeluaranListTodayEl, todayTransactions.filter(t => t.jenis === 'pengeluaran'), 'pengeluaran', 'Tidak ada pengeluaran hari ini.');
-            populateTable(pemasukanListAllEl, allTransactions.filter(t => t.jenis === 'pemasukan'), 'pemasukan', 'Belum ada riwayat pemasukan.');
-            populateTable(pengeluaranListAllEl, allTransactions.filter(t => t.jenis === 'pengeluaran'), 'pengeluaran', 'Belum ada riwayat pengeluaran.');
+        function renderFilteredTransactions() {
+            const pemasukan = filteredTransactions.filter(t => t.jenis === 'pemasukan');
+            const pengeluaran = filteredTransactions.filter(t => t.jenis === 'pengeluaran');
+            populateTable(pemasukanListEl, pemasukan, 'pemasukan', 'Tidak ada pemasukan pada periode ini.');
+            populateTable(pengeluaranListEl, pengeluaran, 'pengeluaran', 'Tidak ada pengeluaran pada periode ini.');
+            renderChart();
         }
 
         function updateSummary() {
             const pemasukan = allTransactions.filter(t => t.jenis === 'pemasukan').reduce((acc, t) => acc + t.nominal, 0);
             const pengeluaran = allTransactions.filter(t => t.jenis === 'pengeluaran').reduce((acc, t) => acc + t.nominal, 0);
-            const saldo = pemasukan - pengeluaran;
+            saldoAkhirEl.textContent = formatRupiah(pemasukan - pengeluaran);
             totalPemasukanEl.textContent = formatRupiah(pemasukan);
             totalPengeluaranEl.textContent = formatRupiah(pengeluaran);
-            saldoAkhirEl.textContent = formatRupiah(saldo);
         }
-
+        
         async function fetchTransactions() {
-            showTableLoading(pemasukanListTodayEl);
-            showTableLoading(pengeluaranListTodayEl);
-            showTableLoading(pemasukanListAllEl);
-            showTableLoading(pengeluaranListAllEl);
+            showTableLoading(pemasukanListEl);
+            showTableLoading(pengeluaranListEl);
             try {
                 const response = await fetch(GOOGLE_SHEET_API_URL);
                 if (!response.ok) throw new Error('Gagal mengambil data dari Google Sheets.');
                 allTransactions = await response.json();
-                renderTransactions();
                 updateSummary();
+                filterTransactions('today');
             } catch (error) {
                 const errorHtml = `<tr><td colspan="4" class="text-center p-4 text-red-600 text-sm">${error.message}</td></tr>`;
-                [pemasukanListTodayEl, pengeluaranListTodayEl, pemasukanListAllEl, pengeluaranListAllEl].forEach(el => el.innerHTML = errorHtml);
+                pemasukanListEl.innerHTML = errorHtml;
+                pengeluaranListEl.innerHTML = errorHtml;
             }
+        }
+
+        function filterTransactions(period) {
+            const now = new Date();
+            let startDate = new Date();
+            let endDate = new Date();
+            if (period === 'today') {
+                startDate.setHours(0, 0, 0, 0);
+                endDate.setHours(23, 59, 59, 999);
+                filterPeriodLabel.textContent = "Hari Ini";
+            } else if (period === 'week') {
+                const dayOfWeek = now.getDay();
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
+                endDate.setHours(23, 59, 59, 999);
+                filterPeriodLabel.textContent = "Minggu Ini";
+            } else if (period === 'month') {
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                endDate.setHours(23, 59, 59, 999);
+                filterPeriodLabel.textContent = "Bulan Ini";
+            } else if (period === 'custom') {
+                const startInput = document.getElementById('start-date').value;
+                const endInput = document.getElementById('end-date').value;
+                if (!startInput || !endInput) { alert('Harap pilih tanggal mulai dan selesai.'); return; }
+                startDate = new Date(startInput);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(endInput);
+                endDate.setHours(23, 59, 59, 999);
+                filterPeriodLabel.textContent = `${formatTanggal(startDate)} - ${formatTanggal(endDate)}`;
+            }
+            filteredTransactions = allTransactions.filter(t => {
+                const transactionDate = new Date(t.tanggal);
+                return transactionDate >= startDate && transactionDate <= endDate;
+            });
+            document.querySelectorAll('[id^="filter-"]').forEach(btn => btn.classList.remove('filter-btn-active'));
+            if (document.getElementById(`filter-${period}`)) {
+                document.getElementById(`filter-${period}`).classList.add('filter-btn-active');
+            }
+            renderFilteredTransactions();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('finance-chart').getContext('2d');
+            const pemasukan = filteredTransactions.filter(t => t.jenis === 'pemasukan').reduce((acc, t) => acc + t.nominal, 0);
+            const pengeluaran = filteredTransactions.filter(t => t.jenis === 'pengeluaran').reduce((acc, t) => acc + t.nominal, 0);
+            if (financeChart) { financeChart.destroy(); }
+            financeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pemasukan', 'Pengeluaran'],
+                    datasets: [{
+                        data: [pemasukan, pengeluaran],
+                        backgroundColor: ['#10B981', '#EF4444'],
+                        borderColor: [document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff'],
+                        borderWidth: 2,
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+        
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(`Laporan Transaksi - ${filterPeriodLabel.textContent}`, 14, 16);
+            const head = [['Tanggal', 'Jenis', 'Deskripsi', 'Nominal']];
+            const body = filteredTransactions.map(t => [formatTanggal(t.tanggal), t.jenis, t.deskripsi, formatRupiah(t.nominal)]);
+            doc.autoTable({ head, body, startY: 20, theme: 'grid' });
+            doc.save(`laporan-${filterPeriodLabel.textContent.replace(/ /g, '_')}.pdf`);
+        }
+
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Tanggal,Jenis,Deskripsi,Nominal\n";
+            filteredTransactions.forEach(t => { csvContent += `${formatTanggal(t.tanggal)},${t.jenis},"${t.deskripsi}",${t.nominal}\n`; });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `laporan-${filterPeriodLabel.textContent.replace(/ /g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         async function addTransaction(e) {
@@ -348,7 +431,7 @@
                 await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(newTransaction), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 await fetchTransactions();
-                transactionForm.reset();
+                document.getElementById('transaction-form').reset();
             } catch (error) {
                 alert(`Gagal menyimpan: ${error.message}`);
             } finally {
@@ -373,10 +456,10 @@
         function openEditModal(id) {
             const transaction = allTransactions.find(t => t.id.toString() === id.toString());
             if (transaction) {
-                editIdInput.value = transaction.id;
-                editJenisInput.value = transaction.jenis;
-                editDeskripsiInput.value = transaction.deskripsi;
-                editNominalInput.value = transaction.nominal;
+                document.getElementById('edit-id').value = transaction.id;
+                document.getElementById('edit-jenis').value = transaction.jenis;
+                document.getElementById('edit-deskripsi').value = transaction.deskripsi;
+                document.getElementById('edit-nominal').value = transaction.nominal;
                 editModal.classList.remove('hidden');
             }
         }
@@ -388,7 +471,7 @@
         async function saveEdit() {
             saveEditBtn.disabled = true;
             saveEditBtn.textContent = 'Menyimpan...';
-            const updatedTransaction = { action: 'edit', id: editIdInput.value, jenis: editJenisInput.value, deskripsi: editDeskripsiInput.value, nominal: parseFloat(editNominalInput.value) };
+            const updatedTransaction = { action: 'edit', id: document.getElementById('edit-id').value, jenis: document.getElementById('edit-jenis').value, deskripsi: document.getElementById('edit-deskripsi').value, nominal: parseFloat(document.getElementById('edit-nominal').value) };
             try {
                 await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(updatedTransaction), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -404,14 +487,15 @@
 
         async function getAiAnalysis() {
             const apiKey = "AIzaSyA_KGVm0tVRGc6hG9rZmvvBpjRZnXfhP_Y";
+            const aiErrorMessage = document.getElementById('ai-error-message');
             aiErrorMessage.classList.add('hidden');
             if (allTransactions.length < 3) {
                 aiResultContainer.innerHTML = 'Mohon miliki minimal 3 transaksi (total) untuk analisis.';
                 return;
             }
             getAnalysisBtn.disabled = true;
-            aiLoadingSpinner.classList.remove('hidden');
-            btnText.textContent = 'Menganalisis...';
+            document.getElementById('ai-loading-spinner').classList.remove('hidden');
+            document.getElementById('btn-text').textContent = 'Menganalisis...';
             const formattedTransactions = allTransactions.map(t => `- ${t.jenis}: ${t.deskripsi} (${formatRupiah(t.nominal)})`).join('\n');
             const prompt = `Kamu adalah Xyli Asisten AI yang cerdas, ramah, dan serba bisa dari farizaladha. Anggap dirimu sebagai teman ngobrol yang asyik dan punya banyak pengetahuan. Kepribadian Anda suportif, dan sedikit edukatif. Fungsi utama Anda adalah konsultan bisnis. Berdasarkan data transaksi ini:\n${formattedTransactions}\n\nBerikan:\n1. Analisis singkat kondisi keuangan (maks 2 kalimat).\n2. Tiga (3) tips konkret dalam format daftar bernomor untuk meningkatkan usaha.\nSampaikan dengan bahasa yang santai dan mudah dipahami. Jangan gunakan markdown tebal atau miring.`;
             try {
@@ -421,20 +505,20 @@
                 if (!response.ok) throw new Error(`Permintaan API gagal.`);
                 const result = await response.json();
                 if (result.candidates && result.candidates[0]) {
-                    aiResultContainer.innerHTML = result.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
+                    document.getElementById('ai-result-container').innerHTML = result.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
                 } else { throw new Error("Respons dari AI tidak valid."); }
             } catch (error) {
                 aiErrorMessage.textContent = "Maaf, terjadi kesalahan saat menghubungi AI: " + error.message;
                 aiErrorMessage.classList.remove('hidden');
             } finally {
                 getAnalysisBtn.disabled = false;
-                aiLoadingSpinner.classList.add('hidden');
-                btnText.textContent = 'Dapatkan Analisis';
+                document.getElementById('ai-loading-spinner').classList.add('hidden');
+                document.getElementById('btn-text').textContent = 'Dapatkan Analisis';
             }
         }
         
         document.addEventListener('DOMContentLoaded', fetchTransactions);
-        transactionForm.addEventListener('submit', addTransaction);
+        document.getElementById('transaction-form').addEventListener('submit', addTransaction);
         getAnalysisBtn.addEventListener('click', getAiAnalysis);
         saveEditBtn.addEventListener('click', saveEdit);
         cancelEditBtn.addEventListener('click', closeEditModal);
