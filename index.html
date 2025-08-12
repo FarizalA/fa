@@ -1,782 +1,274 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catatan Ku</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <!-- Library 3D (Three.js) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Library untuk Grafik (Chart.js) dan Ekspor PDF (jsPDF) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .font-tech { font-family: 'Share Tech Mono', monospace; }
-        .spinner, .table-spinner { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
-        .deleting { opacity: 0.5; pointer-events: none; }
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.3); border-radius: 20px; border: 3px solid transparent; background-clip: content-box; }
-        .custom-scrollbar:hover::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); }
-        .filter-btn-active { 
-            background-color: #0ea5e9 !important; 
-            color: white !important;
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.5);
-        }
-
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-
-        .hud-card {
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: 0 0 20px rgba(14, 165, 233, 0.1);
-            position: relative;
-        }
-        
-        .hud-card::before, .hud-card::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-color: #0ea5e9;
-            border-style: solid;
-            opacity: 0.5;
-        }
-        .hud-card::before { top: -5px; left: -5px; border-width: 2px 0 0 2px; border-top-left-radius: 10px; }
-        .hud-card::after { top: -5px; right: -5px; border-width: 2px 2px 0 0; border-top-right-radius: 10px; }
-        .hud-card > div::before, .hud-card > div::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-color: #0ea5e9;
-            border-style: solid;
-            opacity: 0.5; 
-        }
-        .hud-card > div::before { bottom: -5px; left: -5px; border-width: 0 0 2px 2px; border-bottom-left-radius: 10px; }
-        .hud-card > div::after { bottom: -5px; right: -5px; border-width: 0 2px 2px 0; border-bottom-right-radius: 10px; }
-
-
-        @keyframes fadeInSlideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-slide-up {
-            animation: fadeInSlideUp 0.7s ease-out forwards;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1.0); }
-        }
-        .bounce-dot {
-            width: 1rem;
-            height: 1rem;
-            background-color: #0ea5e9;
-            border-radius: 100%;
-            display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        .bounce-1 { animation-delay: -0.32s; }
-        .bounce-2 { animation-delay: -0.16s; }
-        .bounce-3 { animation-delay: 0s; }
-        
-        @keyframes new-entry-animation {
-            from { background-color: rgba(14, 165, 233, 0.3); transform: translateX(-10px); opacity: 0; }
-            to { background-color: transparent; transform: translateX(0); opacity: 1; }
-        }
-        .new-entry {
-            animation: new-entry-animation 0.8s ease-out;
-        }
-        
-        .text-glow {
-            text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
-        }
-        
-        tbody tr {
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        tbody tr:hover {
-            background-color: rgba(14, 165, 233, 0.1) !important;
-            transform: scale(1.02);
-        }
-        
-        /* Pendaran Cahaya Interaktif */
-        .summary-card {
-            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
-        }
-        .summary-card:hover {
-            transform: translateY(-5px);
-        }
-        .summary-card-pemasukan:hover { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6); }
-        .summary-card-pengeluaran:hover { box-shadow: 0 0 25px rgba(244, 63, 94, 0.6); }
-        .summary-card-saldo:hover { box-shadow: 0 0 25px rgba(59, 130, 246, 0.6); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sakura Minimal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    :root {
+      --sakura:#FDE2E4;
+      --snow:#F9F6F7;
+      --sage:#E2ECE9;
+      --pistachio:#CDE7BE;
+      --cool-grey:#CAD2C5;
+    }
+    body{
+      font-family:'Poppins',sans-serif;
+      background:var(--snow);
+      color:#333;
+      margin:0;
+      line-height:1.6;
+    }
+    header{
+      background:var(--sakura);
+      padding:0.5rem 1rem;
+      text-align:center;
+      font-weight:500;
+    }
+    main{max-width:900px;margin:1rem auto;padding:0 1rem;}
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0;}
+    .kpi-card{background:var(--sage);padding:1rem;border-radius:8px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+    form input[type="text"],form input[type="number"],form input[type="date"]{width:100%;padding:0.5rem;border:1px solid var(--cool-grey);border-radius:4px;margin-bottom:0.5rem;background:white;}
+    .radio-group{display:flex;gap:1rem;margin:0.5rem 0;}
+    .radio-group label{display:flex;align-items:center;gap:0.25rem;}
+    button,select{padding:0.5rem 1rem;border:none;border-radius:4px;font-weight:500;cursor:pointer;}
+    .btn-primary{background:var(--pistachio);} 
+    .btn-secondary{background:var(--sakura);} 
+    section{margin:2rem 0;}
+    table{width:100%;border-collapse:collapse;margin-top:1rem;}
+    th,td{padding:0.5rem;border-bottom:1px solid var(--cool-grey);text-align:left;}
+    td.text-right{text-align:right;}
+    .badge{padding:0.15rem 0.5rem;border-radius:4px;font-size:0.8rem;}
+    .badge.pemasukan{background:var(--pistachio);}
+    .badge.pengeluaran{background:var(--sakura);}
+    #custom-range{display:none;gap:0.5rem;margin-top:0.5rem;}
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-200">
-    
-    <div id="loading-overlay" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 transition-opacity duration-500 ease-out">
-        <div class="flex space-x-2">
-            <div class="bounce-dot bounce-1"></div>
-            <div class="bounce-dot bounce-2"></div>
-            <div class="bounce-dot bounce-3"></div>
+<body>
+  <header>Halo! Senang bisa bantu mengatur keuanganmu 🌸</header>
+  <main>
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card"><h3>Total Pemasukan</h3><p id="total-income">Rp 0</p></div>
+      <div class="kpi-card"><h3>Total Pengeluaran</h3><p id="total-expense">Rp 0</p></div>
+      <div class="kpi-card"><h3>Saldo Akhir</h3><p id="balance">Rp 0</p></div>
+    </div>
+
+    <!-- Form -->
+    <section>
+      <h2>Transaksi Baru</h2>
+      <form id="transaction-form">
+        <input id="desc" type="text" placeholder="Contoh: Gaji" required>
+        <input id="amount" type="number" placeholder="Nominal" required>
+        <div class="radio-group">
+          <label><input type="radio" name="type" value="pemasukan" checked>Pemasukan</label>
+          <label><input type="radio" name="type" value="pengeluaran">Pengeluaran</label>
         </div>
-        <p class="mt-4 text-slate-300 text-lg">Memuat data...</p>
-    </div>
+        <button type="submit" class="btn-primary">Simpan Transaksi</button>
+      </form>
+    </section>
 
-    <canvas id="bg-canvas"></canvas>
+    <!-- Analysis -->
+    <section>
+      <h2>Analisis & Wawasan</h2>
+      <p id="insight">Belum ada transaksi.</p>
+      <button id="ai-btn" class="btn-secondary">Dapatkan Analisis AI Lengkap</button>
+    </section>
 
-    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl relative z-10">
-        
-        <header class="relative text-center mb-10 animate-fade-in-slide-up" style="animation-delay: 100ms;">
-            <h1 class="text-3xl sm:text-4xl font-bold text-white flex items-center justify-center gap-3 text-glow">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                Catatan Ku
-            </h1>
-            <p class="text-slate-400 mt-2">Hay Selamat Datang</p>
-        </header>
+    <!-- Filter & Chart -->
+    <section>
+      <h2>Periode</h2>
+      <label for="date-filter">Filter tanggal:</label>
+      <select id="date-filter">
+        <option value="daily">Harian</option>
+        <option value="weekly">Mingguan</option>
+        <option value="monthly">Bulanan</option>
+        <option value="custom">Custom</option>
+      </select>
+      <div id="custom-range">
+        <input type="date" id="start-date">
+        <input type="date" id="end-date">
+        <button id="apply-range" class="btn-primary">Terapkan</button>
+      </div>
+      <canvas id="chart" height="120"></canvas>
+    </section>
 
-        <main>
-            <section class="hud-card p-6 rounded-xl mb-8 animate-fade-in-slide-up" style="animation-delay: 200ms;">
-                <div> <!-- Wrapper untuk sudut -->
-                <h2 class="text-xl font-semibold mb-4 text-slate-300 text-glow">Ringkasan Keuangan</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                    <div class="summary-card summary-card-pemasukan bg-emerald-900/30 p-4 rounded-lg border border-emerald-800">
-                        <p class="text-sm text-emerald-400 font-medium">Total Pemasukan</p>
-                        <p id="total-pemasukan" class="text-2xl font-bold text-emerald-300 font-tech">Rp 0</p>
-                    </div>
-                    <div class="summary-card summary-card-pengeluaran bg-rose-900/30 p-4 rounded-lg border border-rose-800">
-                        <p class="text-sm text-rose-400 font-medium">Total Pengeluaran</p>
-                        <p id="total-pengeluaran" class="text-2xl font-bold text-rose-300 font-tech">Rp 0</p>
-                    </div>
-                    <div class="summary-card summary-card-saldo bg-sky-900/30 p-4 rounded-lg border border-sky-800">
-                        <p class="text-sm text-sky-400 font-medium">Saldo Akhir</p>
-                        <p id="saldo-akhir" class="text-2xl font-bold text-sky-300 font-tech">Rp 0</p>
-                    </div>
-                </div>
-                </div>
-            </section>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-8 animate-fade-in-slide-up" style="animation-delay: 300ms;">
-                <section class="lg:col-span-3 hud-card p-6 rounded-xl">
-                    <div> <!-- Wrapper untuk sudut -->
-                    <h2 class="text-xl font-semibold text-slate-300 mb-4 text-glow">Tambah Transaksi Baru</h2>
-                    <form id="transaction-form" class="space-y-4">
-                        <div>
-                            <label for="deskripsi" class="block text-sm font-medium text-slate-400">Deskripsi</label>
-                            <input type="text" id="deskripsi" placeholder="Contoh: Penjualan produk A" class="mt-1 block w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md shadow-sm text-slate-200 focus:ring-sky-500 focus:border-sky-500" required>
-                        </div>
-                        <div>
-                            <label for="nominal" class="block text-sm font-medium text-slate-400">Nominal (Rp)</label>
-                            <input type="number" id="nominal" placeholder="Contoh: 50000" class="mt-1 block w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md shadow-sm text-slate-200 focus:ring-sky-500 focus:border-sky-500" required>
-                        </div>
-                        <div>
-                            <label for="jenis" class="block text-sm font-medium text-slate-400">Jenis Transaksi</label>
-                            <select id="jenis" class="mt-1 block w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md shadow-sm text-slate-200 focus:ring-sky-500 focus:border-sky-500">
-                                <option value="pemasukan">Pemasukan</option>
-                                <option value="pengeluaran">Pengeluaran</option>
-                            </select>
-                        </div>
-                        <div class="text-right pt-2">
-                            <button type="submit" id="submit-btn" class="inline-flex items-center justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 active:scale-95 transition-transform">
-                                Simpan Transaksi
-                            </button>
-                        </div>
-                    </form>
-                    </div>
-                </section>
-                <section class="lg:col-span-2 hud-card p-6 rounded-xl flex flex-col">
-                    <div> <!-- Wrapper untuk sudut -->
-                    <h2 class="text-xl font-semibold text-slate-300 mb-4 text-glow">Analisis & Wawasan ✨</h2>
-                    <div id="ai-result-container" class="bg-slate-700/50 p-4 rounded-lg flex-grow prose prose-sm max-w-none text-slate-300">
-                        <!-- Konten Wawasan dan Analisis AI akan muncul di sini -->
-                    </div>
-                    <div id="ai-error-message" class="hidden bg-rose-900/50 text-rose-300 p-4 rounded-lg my-4"></div>
-                    <div class="text-center mt-4">
-                        <button id="get-analysis-btn" class="w-full inline-flex items-center justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 active:scale-95 transition-transform">
-                            <span id="btn-text">Dapatkan Analisis AI Lengkap</span>
-                            <div id="ai-loading-spinner" class="hidden spinner w-5 h-5 border-4 border-white rounded-full ml-2"></div>
-                        </button>
-                    </div>
-                    </div>
-                </section>
-            </div>
+    <!-- Export -->
+    <section>
+      <label for="export-select">Ekspor Laporan:</label>
+      <select id="export-select">
+        <option value="">Pilih format</option>
+        <option value="csv">CSV</option>
+        <option value="xlsx">XLSX</option>
+        <option value="pdf">PDF</option>
+      </select>
+    </section>
 
-            <section class="hud-card p-6 rounded-xl mb-8 animate-fade-in-slide-up" style="animation-delay: 400ms;">
-                <div> <!-- Wrapper untuk sudut -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-300 mb-3 text-glow">Filter Transaksi</h3>
-                        <div class="flex flex-wrap gap-2 mb-3">
-                            <button onclick="filterTransactions('today')" id="filter-today" class="filter-btn-active px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 active:scale-95 transition-transform">Hari Ini</button>
-                            <button onclick="filterTransactions('week')" id="filter-week" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 active:scale-95 transition-transform">Minggu Ini</button>
-                            <button onclick="filterTransactions('month')" id="filter-month" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 active:scale-95 transition-transform">Bulan Ini</button>
-                        </div>
-                        <div class="flex items-end gap-2">
-                            <div>
-                                <label for="start-date" class="text-sm text-slate-400">Dari</label>
-                                <input type="date" id="start-date" class="mt-1 w-full p-2 border border-slate-600 rounded-md bg-slate-700 focus:ring-sky-500 focus:border-sky-500">
-                            </div>
-                            <div>
-                                <label for="end-date" class="text-sm text-slate-400">Sampai</label>
-                                <input type="date" id="end-date" class="mt-1 w-full p-2 border border-slate-600 rounded-md bg-slate-700 focus:ring-sky-500 focus:border-sky-500">
-                            </div>
-                            <button onclick="filterTransactions('custom')" class="px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-md active:scale-95 transition-transform">Filter</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                         <div class="bg-slate-700/50 p-4 rounded-lg text-center border border-slate-700">
-                            <h3 class="text-lg font-semibold text-slate-300 mb-2 text-glow">Grafik Periode</h3>
-                            <div class="h-32 w-32 mx-auto"><canvas id="finance-chart"></canvas></div>
-                        </div>
-                        <div class="bg-slate-700/50 p-4 rounded-lg text-center flex flex-col justify-center border border-slate-700">
-                            <h3 class="text-lg font-semibold text-slate-300 mb-3 text-glow">Ekspor Laporan</h3>
-                            <div class="space-y-2">
-                                <button onclick="exportToPDF()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md active:scale-95 transition-transform">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-                                    PDF
-                                </button>
-                                <button onclick="exportToCSV()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md active:scale-95 transition-transform">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 12.5a2.5 2.5 0 0 1 5 0V15a2.5 2.5 0 0 1-5 0Z"/><path d="M7 12.5a2.5 2.5 0 0 1 5 0V15a2.5 2.5 0 0 1-5 0Z"/></svg>
-                                    CSV
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </section>
+    <!-- History Table -->
+    <section>
+      <h2>Riwayat Transaksi</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Deskripsi</th>
+            <th>Pemasukan</th>
+            <th>Pengeluaran</th>
+            <th>Jenis</th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </section>
+  </main>
 
-            <section id="history-section-filtered" class="hud-card p-6 rounded-xl animate-fade-in-slide-up" style="animation-delay: 500ms;">
-                <div> <!-- Wrapper untuk sudut -->
-                <h2 class="text-xl font-semibold mb-4 text-slate-300 text-glow">Riwayat Transaksi <span id="filter-period-label" class="text-sky-400">Hari Ini</span></h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="text-lg font-medium text-emerald-400 mb-3">Pemasukan</h3>
-                        <div class="overflow-y-auto max-h-80 border border-slate-700 rounded-lg custom-scrollbar">
-                            <table class="min-w-full divide-y divide-slate-700">
-                                <thead class="bg-slate-700/50 sticky top-0 backdrop-blur-sm">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Deskripsi</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Nominal</th>
-                                        <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pemasukan-list" class="bg-slate-800/50 divide-y divide-slate-700"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-medium text-rose-400 mb-3">Pengeluaran</h3>
-                        <div class="overflow-y-auto max-h-80 border border-slate-700 rounded-lg custom-scrollbar">
-                            <table class="min-w-full divide-y divide-slate-700">
-                                <thead class="bg-slate-700/50 sticky top-0 backdrop-blur-sm">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Deskripsi</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Nominal</th>
-                                        <th class="relative px-4 py-2"><span class="sr-only">Aksi</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pengeluaran-list" class="bg-slate-800/50 divide-y divide-slate-700"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </section>
-        </main>
-    </div>
+  <script>
+    const transactions = [];
+    const form = document.getElementById('transaction-form');
+    const insightEl = document.getElementById('insight');
+    const dateFilter = document.getElementById('date-filter');
+    const customRange = document.getElementById('custom-range');
+    const startDate = document.getElementById('start-date');
+    const endDate = document.getElementById('end-date');
+    const exportSelect = document.getElementById('export-select');
+    let chart;
 
-    <!-- Edit Modal -->
-    <div id="edit-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50">
-        <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-slate-800 border-slate-700">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-white">Edit Transaksi</h3>
-                <div class="mt-2 px-7 py-3">
-                    <form id="edit-form" class="space-y-4 text-left">
-                        <input type="hidden" id="edit-id">
-                        <input type="hidden" id="edit-jenis">
-                        <div>
-                            <label for="edit-deskripsi" class="block text-sm font-medium text-slate-400">Deskripsi</label>
-                            <input type="text" id="edit-deskripsi" class="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm" required>
-                        </div>
-                        <div>
-                            <label for="edit-nominal" class="block text-sm font-medium text-slate-400">Nominal (Rp)</label>
-                            <input type="number" id="edit-nominal" class="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="items-center px-4 py-3 space-y-2">
-                    <button id="save-edit-btn" class="px-4 py-2 bg-sky-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300">
-                        Simpan Perubahan
-                    </button>
-                     <button id="cancel-edit-btn" class="px-4 py-2 bg-slate-600 text-slate-200 text-base font-medium rounded-md w-full shadow-sm hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                        Batal
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    form.addEventListener('submit', addTransaction);
+    dateFilter.addEventListener('change', () => {
+      customRange.style.display = dateFilter.value === 'custom' ? 'flex' : 'none';
+      if(dateFilter.value !== 'custom') updateChart();
+    });
+    document.getElementById('apply-range').addEventListener('click', updateChart);
+    document.getElementById('ai-btn').addEventListener('click', () => alert('Fitur analisis AI belum tersedia.'));
+    exportSelect.addEventListener('change', e => { if(e.target.value){ exportReport(e.target.value); e.target.value=''; } });
 
-    <script>
-        // --- 3D BACKGROUND SCRIPT ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    function addTransaction(e){
+      e.preventDefault();
+      const desc = document.getElementById('desc').value.trim();
+      const amount = parseFloat(document.getElementById('amount').value);
+      const type = document.querySelector('input[name="type"]:checked').value;
+      if(!desc || isNaN(amount)) return;
+      transactions.push({date:new Date(), desc, amount, type});
+      form.reset();
+      updateAll();
+    }
 
-        const particles = new THREE.Group();
-        const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-        
-        for (let i = 0; i < 200; i++) {
-            const material = new THREE.MeshStandardMaterial({
-                color: [0x0ea5e9, 0xec4899, 0x10b981][Math.floor(Math.random() * 3)],
-                metalness: 0.6,
-                roughness: 0.4,
-                wireframe: true
-            });
-            const particle = new THREE.Mesh(geometry, material);
-            particle.position.set(
-                (Math.random() - 0.5) * 25,
-                (Math.random() - 0.5) * 25,
-                (Math.random() - 0.5) * 25
-            );
-            particle.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-            particles.add(particle);
+    function updateAll(){
+      updateSummary();
+      renderTable();
+      updateChart();
+      generateInsight();
+    }
+
+    function updateSummary(){
+      let income=0, expense=0;
+      transactions.forEach(t=>{
+        if(t.type==='pemasukan') income+=t.amount; else expense+=t.amount;
+      });
+      document.getElementById('total-income').textContent = formatRupiah(income);
+      document.getElementById('total-expense').textContent = formatRupiah(expense);
+      document.getElementById('balance').textContent = formatRupiah(income-expense);
+    }
+
+    function renderTable(){
+      const tbody = document.getElementById('history-body');
+      tbody.innerHTML='';
+      transactions.slice().reverse().forEach(t=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${t.date.toLocaleDateString('id-ID')}</td>
+                      <td>${t.desc}</td>
+                      <td class="text-right">${t.type==='pemasukan'?formatRupiah(t.amount):''}</td>
+                      <td class="text-right">${t.type==='pengeluaran'?formatRupiah(t.amount):''}</td>
+                      <td><span class="badge ${t.type}">${t.type==='pemasukan'?'Pemasukan':'Pengeluaran'}</span></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function generateInsight(){
+      if(transactions.length===0){ insightEl.textContent='Belum ada transaksi.'; return; }
+      const income = transactions.filter(t=>t.type==='pemasukan').reduce((s,t)=>s+t.amount,0);
+      const expense = transactions.filter(t=>t.type==='pengeluaran').reduce((s,t)=>s+t.amount,0);
+      const balance = income-expense;
+      insightEl.textContent = `Total transaksi: ${transactions.length}. Saldo akhir ${balance>=0?'surplus':'defisit'} ${formatRupiah(Math.abs(balance))}.`;
+    }
+
+    function updateChart(){
+      const filter = dateFilter.value;
+      const map = {};
+      const addData=(key,type,amt)=>{ if(!map[key]) map[key]={income:0,expense:0}; map[key][type]+=amt; };
+      transactions.forEach(t=>{
+        const d=new Date(t.date);
+        let key;
+        if(filter==='daily') key=d.toISOString().slice(0,10);
+        else if(filter==='weekly') key=weekKey(d);
+        else if(filter==='monthly') key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        else if(filter==='custom'){
+          if(!startDate.value||!endDate.value) return;
+          const s=new Date(startDate.value); const e=new Date(endDate.value); e.setHours(23,59,59,999);
+          if(d<s||d>e) return; key=d.toISOString().slice(0,10);
         }
-        scene.add(particles);
+        addData(key, t.type==='pemasukan'?'income':'expense', t.amount);
+      });
+      const labels=Object.keys(map).sort();
+      const incomeData=labels.map(l=>map[l].income);
+      const expenseData=labels.map(l=>map[l].expense);
+      const ctx=document.getElementById('chart').getContext('2d');
+      if(chart) chart.destroy();
+      chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Pemasukan',data:incomeData,fill:true,backgroundColor:'rgba(205,231,190,0.4)',borderColor:'#CDE7BE',tension:0.4},{label:'Pengeluaran',data:expenseData,fill:true,backgroundColor:'rgba(253,226,228,0.4)',borderColor:'#FDE2E4',tension:0.4}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}});
+    }
 
-        const ambientLight = new THREE.AmbientLight(0x999999);
-        scene.add(ambientLight);
+    function weekKey(d){
+      const firstJan=new Date(d.getFullYear(),0,1);
+      const day=Math.floor((d-firstJan)/86400000)+firstJan.getDay();
+      const week=Math.ceil(day/7);
+      return `${d.getFullYear()}-W${week}`;
+    }
 
-        // Pencahayaan Dramatis
-        const emeraldLight = new THREE.PointLight(0x10b981, 0, 100);
-        emeraldLight.position.set(-10, 10, 10);
-        scene.add(emeraldLight);
+    function formatRupiah(num){
+      return num.toLocaleString('id-ID',{style:'currency',currency:'IDR'});
+    }
 
-        const roseLight = new THREE.PointLight(0xec4899, 0, 100);
-        roseLight.position.set(10, -10, 10);
-        scene.add(roseLight);
-        
-        camera.position.z = 5;
+    function exportReport(type){
+      if(transactions.length===0){alert('Belum ada data.');return;}
+      if(type==='csv') exportCSV();
+      if(type==='xlsx') exportXLSX();
+      if(type==='pdf') exportPDF();
+    }
 
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (event) => {
-            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-        });
+    function exportCSV(){
+      const rows=[['Tanggal','Deskripsi','Pemasukan','Pengeluaran','Jenis']];
+      transactions.forEach(t=>rows.push([t.date.toLocaleDateString('id-ID'),t.desc,t.type==='pemasukan'?t.amount:'',t.type==='pengeluaran'?t.amount:'',t.type]));
+      let csv=rows.map(r=>r.join(',')).join('\n');
+      const blob=new Blob([csv],{type:'text/csv'});
+      const link=document.createElement('a');
+      link.href=URL.createObjectURL(blob);
+      link.download='laporan.csv';
+      link.click();
+    }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            particles.rotation.x += 0.0008;
-            particles.rotation.y += 0.0008;
-            
-            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
-            camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
-            camera.lookAt(scene.position);
+    function exportXLSX(){
+      const wb=XLSX.utils.book_new();
+      const ws_data=[['Tanggal','Deskripsi','Pemasukan','Pengeluaran','Jenis']];
+      transactions.forEach(t=>ws_data.push([t.date.toLocaleDateString('id-ID'),t.desc,t.type==='pemasukan'?t.amount:'',t.type==='pengeluaran'?t.amount:'',t.type]));
+      const ws=XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb,ws,'Laporan');
+      XLSX.writeFile(wb,'laporan.xlsx');
+    }
 
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // --- DARK MODE SCRIPT ---
-        document.documentElement.classList.add('dark');
-
-        // --- APPLICATION SCRIPT ---
-        const GOOGLE_SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxorfRq7bYC5rtP1e3yZZPpvzPtpXuTqrJ47COBAQaQV6tMDk5XDJ97aK5qEB2ZbuCJ/exec';
-        
-        const mainContent = document.getElementById('main-content');
-        const transactionForm = document.getElementById('transaction-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const totalPemasukanEl = document.getElementById('total-pemasukan');
-        const totalPengeluaranEl = document.getElementById('total-pengeluaran');
-        const saldoAkhirEl = document.getElementById('saldo-akhir');
-        
-        const pemasukanListEl = document.getElementById('pemasukan-list');
-        const pengeluaranListEl = document.getElementById('pengeluaran-list');
-        const filterPeriodLabel = document.getElementById('filter-period-label');
-
-        const getAnalysisBtn = document.getElementById('get-analysis-btn');
-        const aiResultContainer = document.getElementById('ai-result-container');
-        const aiLoadingSpinner = document.getElementById('ai-loading-spinner');
-        const btnText = document.getElementById('btn-text');
-        const aiErrorMessage = document.getElementById('ai-error-message');
-        
-        const editModal = document.getElementById('edit-modal');
-        const saveEditBtn = document.getElementById('save-edit-btn');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
-        
-        let allTransactions = [];
-        let filteredTransactions = [];
-        let financeChart;
-        let lastAddedId = null;
-
-        function formatRupiah(angka) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka); }
-        function formatTanggal(isoString) { if (!isoString) return ''; const date = new Date(isoString); const options = { day: '2-digit', month: 'short', year: '2-digit' }; return date.toLocaleDateString('id-ID', options).replace(/\./g, ''); }
-        function showTableLoading(tbody) { tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4"><div class="flex justify-center items-center text-sm text-slate-500 dark:text-slate-400"><div class="table-spinner w-4 h-4 border-2 border-slate-300 rounded-full mr-2"></div>Memuat...</div></td></tr>`; }
-
-        function populateTable(tbodyEl, data, jenis, emptyMessage) {
-            tbodyEl.innerHTML = '';
-            if (data.length === 0) {
-                tbodyEl.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-sm text-slate-500 dark:text-slate-400">${emptyMessage}</td></tr>`;
-                return;
-            }
-            const sortedData = [...data].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-            sortedData.forEach(transaction => {
-                const row = document.createElement('tr');
-                row.id = `trx-${transaction.id}`;
-                if (transaction.id === lastAddedId) {
-                    row.classList.add('new-entry');
-                }
-                const isPemasukan = transaction.jenis === 'pemasukan';
-                row.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">${formatTanggal(transaction.tanggal)}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-800 dark:text-slate-200">${transaction.deskripsi}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${isPemasukan ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${formatRupiah(transaction.nominal)}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <button onclick="openEditModal('${transaction.id}')" class="text-sky-600 hover:text-sky-800 dark:text-sky-400 dark:hover:text-sky-300 transition-transform active:scale-90">Edit</button>
-                        <button onclick="deleteTransaction('${transaction.id}', '${transaction.jenis}')" class="text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300 transition-transform active:scale-90">Hapus</button>
-                    </td>
-                `;
-                tbodyEl.appendChild(row);
-            });
-            lastAddedId = null;
-        }
-
-        function renderFilteredTransactions() {
-            const pemasukan = filteredTransactions.filter(t => t.jenis === 'pemasukan');
-            const pengeluaran = filteredTransactions.filter(t => t.jenis === 'pengeluaran');
-            populateTable(pemasukanListEl, pemasukan, 'pemasukan', 'Tidak ada pemasukan pada periode ini.');
-            populateTable(pengeluaranListEl, pengeluaran, 'pengeluaran', 'Tidak ada pengeluaran pada periode ini.');
-            renderChart();
-            generateInsights();
-        }
-
-        function animateCountUp(element, endValue) {
-            let startValue = parseFloat(element.textContent.replace(/[^0-9,-]+/g,"")) || 0;
-            const duration = 1500;
-            const startTime = performance.now();
-            function update(currentTime) {
-                const elapsedTime = currentTime - startTime;
-                if (elapsedTime > duration) {
-                    element.textContent = formatRupiah(endValue);
-                    return;
-                }
-                const progress = elapsedTime / duration;
-                const currentValue = startValue + (endValue - startValue) * progress;
-                element.textContent = formatRupiah(currentValue);
-                requestAnimationFrame(update);
-            }
-            requestAnimationFrame(update);
-        }
-
-        function update3DLighting(pemasukan, pengeluaran) {
-            const total = pemasukan + pengeluaran;
-            if (total === 0) {
-                emeraldLight.intensity = 0.5;
-                roseLight.intensity = 0.5;
-                return;
-            }
-            const pemasukanRatio = pemasukan / total;
-            const pengeluaranRatio = pengeluaran / total;
-            
-            // Animate light intensity change
-            const targetEmerald = pemasukanRatio * 2.5;
-            const targetRose = pengeluaranRatio * 2.5;
-
-            const animateLight = (light, target) => {
-                const start = light.intensity;
-                const duration = 1000;
-                const startTime = performance.now();
-                function update(currentTime) {
-                    const elapsedTime = currentTime - startTime;
-                    if (elapsedTime > duration) {
-                        light.intensity = target;
-                        return;
-                    }
-                    const progress = elapsedTime / duration;
-                    light.intensity = start + (target - start) * progress;
-                    requestAnimationFrame(update);
-                }
-                requestAnimationFrame(update);
-            };
-            
-            animateLight(emeraldLight, targetEmerald);
-            animateLight(roseLight, targetRose);
-        }
-
-        function updateSummary() {
-            const pemasukan = allTransactions.filter(t => t.jenis === 'pemasukan').reduce((acc, t) => acc + t.nominal, 0);
-            const pengeluaran = allTransactions.filter(t => t.jenis === 'pengeluaran').reduce((acc, t) => acc + t.nominal, 0);
-            const saldo = pemasukan - pengeluaran;
-            animateCountUp(totalPemasukanEl, pemasukan);
-            animateCountUp(totalPengeluaranEl, pengeluaran);
-            animateCountUp(saldoAkhirEl, saldo);
-            update3DLighting(pemasukan, pengeluaran);
-        }
-        
-        async function fetchTransactions() {
-            try {
-                const response = await fetch(GOOGLE_SHEET_API_URL);
-                if (!response.ok) throw new Error('Gagal mengambil data dari Google Sheets.');
-                allTransactions = await response.json();
-                updateSummary();
-                filterTransactions('today');
-            } catch (error) {
-                const errorHtml = `<tr><td colspan="4" class="text-center p-4 text-rose-600 text-sm">${error.message}</td></tr>`;
-                pemasukanListEl.innerHTML = errorHtml;
-                pengeluaranListEl.innerHTML = errorHtml;
-            } finally {
-                const loadingOverlay = document.getElementById('loading-overlay');
-                loadingOverlay.classList.add('opacity-0');
-                setTimeout(() => {
-                    loadingOverlay.classList.add('hidden');
-                }, 500);
-            }
-        }
-
-        function filterTransactions(period) {
-            const now = new Date();
-            let startDate = new Date();
-            let endDate = new Date();
-            if (period === 'today') {
-                startDate.setHours(0, 0, 0, 0);
-                endDate.setHours(23, 59, 59, 999);
-                filterPeriodLabel.textContent = "Hari Ini";
-            } else if (period === 'week') {
-                const dayOfWeek = now.getDay();
-                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek);
-                startDate.setHours(0, 0, 0, 0);
-                endDate = new Date(startDate);
-                endDate.setDate(startDate.getDate() + 6);
-                endDate.setHours(23, 59, 59, 999);
-                filterPeriodLabel.textContent = "Minggu Ini";
-            } else if (period === 'month') {
-                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                startDate.setHours(0, 0, 0, 0);
-                endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                endDate.setHours(23, 59, 59, 999);
-                filterPeriodLabel.textContent = "Bulan Ini";
-            } else if (period === 'custom') {
-                const startInput = document.getElementById('start-date').value;
-                const endInput = document.getElementById('end-date').value;
-                if (!startInput || !endInput) { alert('Harap pilih tanggal mulai dan selesai.'); return; }
-                startDate = new Date(startInput);
-                startDate.setHours(0, 0, 0, 0);
-                endDate = new Date(endInput);
-                endDate.setHours(23, 59, 59, 999);
-                filterPeriodLabel.textContent = `${formatTanggal(startDate)} - ${formatTanggal(endDate)}`;
-            }
-            filteredTransactions = allTransactions.filter(t => {
-                const transactionDate = new Date(t.tanggal);
-                return transactionDate >= startDate && transactionDate <= endDate;
-            });
-            document.querySelectorAll('[id^="filter-"]').forEach(btn => btn.classList.remove('filter-btn-active'));
-            if (document.getElementById(`filter-${period}`)) {
-                document.getElementById(`filter-${period}`).classList.add('filter-btn-active');
-            }
-            renderFilteredTransactions();
-        }
-
-        function renderChart() {
-            const ctx = document.getElementById('finance-chart').getContext('2d');
-            const pemasukan = filteredTransactions.filter(t => t.jenis === 'pemasukan').reduce((acc, t) => acc + t.nominal, 0);
-            const pengeluaran = filteredTransactions.filter(t => t.jenis === 'pengeluaran').reduce((acc, t) => acc + t.nominal, 0);
-            if (financeChart) { financeChart.destroy(); }
-            financeChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Pemasukan', 'Pengeluaran'],
-                    datasets: [{
-                        data: [pemasukan, pengeluaran],
-                        backgroundColor: ['#10B981', '#EF4444'],
-                        borderColor: [document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff'],
-                        borderWidth: 4,
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
-            });
-        }
-        
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text(`Laporan Transaksi - ${filterPeriodLabel.textContent}`, 14, 16);
-            const head = [['Tanggal', 'Jenis', 'Deskripsi', 'Nominal']];
-            const body = filteredTransactions.map(t => [formatTanggal(t.tanggal), t.jenis, t.deskripsi, formatRupiah(t.nominal)]);
-            doc.autoTable({ head, body, startY: 20, theme: 'grid' });
-            doc.save(`laporan-${filterPeriodLabel.textContent.replace(/ /g, '_')}.pdf`);
-        }
-
-        function exportToCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,Tanggal,Jenis,Deskripsi,Nominal\n";
-            filteredTransactions.forEach(t => { csvContent += `${formatTanggal(t.tanggal)},${t.jenis},"${t.deskripsi}",${t.nominal}\n`; });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `laporan-${filterPeriodLabel.textContent.replace(/ /g, '_')}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        async function addTransaction(e) {
-            e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Menyimpan...';
-            const newTransactionData = { action: 'add', deskripsi: document.getElementById('deskripsi').value, nominal: parseFloat(document.getElementById('nominal').value), jenis: document.getElementById('jenis').value };
-            try {
-                await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(newTransactionData), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                const tempId = Date.now();
-                lastAddedId = tempId;
-                allTransactions.push({ id: tempId, tanggal: new Date().toISOString(), ...newTransactionData });
-                updateSummary();
-                filterTransactions(document.querySelector('.filter-btn-active').id.replace('filter-', ''));
-                document.getElementById('transaction-form').reset();
-                fetchTransactions();
-            } catch (error) {
-                alert(`Gagal menyimpan: ${error.message}`);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Simpan Transaksi';
-            }
-        }
-
-        async function deleteTransaction(id, jenis) {
-            if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) return;
-            document.getElementById(`trx-${id}`).classList.add('deleting');
-            try {
-                await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', id, jenis }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                await fetchTransactions();
-            } catch (error) {
-                alert(`Gagal menghapus: ${error.message}`);
-                document.getElementById(`trx-${id}`).classList.remove('deleting');
-            }
-        }
-
-        function openEditModal(id) {
-            const transaction = allTransactions.find(t => t.id.toString() === id.toString());
-            if (transaction) {
-                document.getElementById('edit-id').value = transaction.id;
-                document.getElementById('edit-jenis').value = transaction.jenis;
-                document.getElementById('edit-deskripsi').value = transaction.deskripsi;
-                document.getElementById('edit-nominal').value = transaction.nominal;
-                editModal.classList.remove('hidden');
-            }
-        }
-
-        function closeEditModal() {
-            editModal.classList.add('hidden');
-        }
-
-        async function saveEdit() {
-            saveEditBtn.disabled = true;
-            saveEditBtn.textContent = 'Menyimpan...';
-            const updatedTransaction = { action: 'edit', id: document.getElementById('edit-id').value, jenis: document.getElementById('edit-jenis').value, deskripsi: document.getElementById('edit-deskripsi').value, nominal: parseFloat(document.getElementById('edit-nominal').value) };
-            try {
-                await fetch(GOOGLE_SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(updatedTransaction), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                closeEditModal();
-                await fetchTransactions();
-            } catch (error) {
-                alert(`Gagal memperbarui: ${error.message}`);
-            } finally {
-                saveEditBtn.disabled = false;
-                saveEditBtn.textContent = 'Simpan Perubahan';
-            }
-        }
-        
-        function generateInsights() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const todayTransactions = allTransactions.filter(t => new Date(t.tanggal).setHours(0,0,0,0) === today.getTime());
-
-            if (todayTransactions.length === 0) {
-                aiResultContainer.innerHTML = `<p class="flex items-center justify-center h-full">Belum ada aktivitas hari ini. Ayo mulai catat transaksi pertamamu!</p>`;
-                return;
-            }
-
-            const todayPemasukan = todayTransactions.filter(t => t.jenis === 'pemasukan');
-            const todayPengeluaran = todayTransactions.filter(t => t.jenis === 'pengeluaran');
-
-            let insights = [];
-            insights.push(`Hari ini kamu telah mencatat <strong>${todayTransactions.length} transaksi</strong>. Kerja bagus!`);
-
-            if (todayPemasukan.length > 0) {
-                const maxPemasukan = todayPemasukan.reduce((max, t) => t.nominal > max.nominal ? t : max, todayPemasukan[0]);
-                insights.push(`Pemasukan terbesarmu hari ini dari <strong>"${maxPemasukan.deskripsi}"</strong> sebesar <strong>${formatRupiah(maxPemasukan.nominal)}</strong>.`);
-            }
-
-            if (todayPengeluaran.length > 0) {
-                const maxPengeluaran = todayPengeluaran.reduce((max, t) => t.nominal > max.nominal ? t : max, todayPengeluaran[0]);
-                insights.push(`Pengeluaran terbesarmu hari ini untuk <strong>"${maxPengeluaran.deskripsi}"</strong> sebesar <strong>${formatRupiah(maxPengeluaran.nominal)}</strong>.`);
-            }
-
-            const randomInsight = insights[Math.floor(Math.random() * insights.length)];
-            aiResultContainer.innerHTML = `<p>${randomInsight}</p>`;
-        }
-        
-        async function getAiAnalysis() {
-            const apiKey = "AIzaSyA_KGVm0tVRGc6hG9rZmvvBpjRZnXfhP_Y";
-            aiErrorMessage.classList.add('hidden');
-            if (allTransactions.length < 3) {
-                aiResultContainer.innerHTML = 'Mohon miliki minimal 3 transaksi (total) untuk analisis.';
-                return;
-            }
-            getAnalysisBtn.disabled = true;
-            aiLoadingSpinner.classList.remove('hidden');
-            btnText.textContent = 'Menganalisis...';
-            const formattedTransactions = allTransactions.map(t => `- ${t.jenis}: ${t.deskripsi} (${formatRupiah(t.nominal)})`).join('\n');
-            const prompt = `Kamu adalah Xyli Asisten AI yang cerdas, ramah, dan serba bisa dari farizaladha. Kamu bisa memperkenalkan diri seperti ini "Aku Xyli asisten yang di buat oleh Farizaladha"  Anggap dirimu sebagai teman ngrol yang asyik dan punya banyak pengetahuan. Kepribadian Anda suportif, dan sedikit edukatif. Fungsi utama Anda adalah konsultan bisnis. Berdasarkan data transaksi ini:\n${formattedTransactions}\n\nBerikan:\n1. Analisis singkat kondisi keuangan (maks 2 kalimat).\n2. Tiga (3) tips konkret dalam format daftar bernomor untuk meningkatkan usaha.\nSampaikan dengan bahasa yang santai dan mudah dipahami. Jangan gunakan markdown tebal atau miring.`;
-            try {
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`Permintaan API gagal.`);
-                const result = await response.json();
-                if (result.candidates && result.candidates[0]) {
-                    aiResultContainer.innerHTML = result.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
-                } else { throw new Error("Respons dari AI tidak valid."); }
-            } catch (error) {
-                aiErrorMessage.textContent = "Maaf, terjadi kesalahan saat menghubungi AI: " + error.message;
-                aiErrorMessage.classList.remove('hidden');
-            } finally {
-                getAnalysisBtn.disabled = false;
-                aiLoadingSpinner.classList.add('hidden');
-                btnText.textContent = 'Dapatkan Analisis AI Lengkap';
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', fetchTransactions);
-        transactionForm.addEventListener('submit', addTransaction);
-        getAnalysisBtn.addEventListener('click', getAiAnalysis);
-        saveEditBtn.addEventListener('click', saveEdit);
-        cancelEditBtn.addEventListener('click', closeEditModal);
-    </script>
+    function exportPDF(){
+      const { jsPDF } = window.jspdf;
+      const doc=new jsPDF();
+      const rows=transactions.map(t=>[t.date.toLocaleDateString('id-ID'),t.desc,t.type==='pemasukan'?formatRupiah(t.amount):'',t.type==='pengeluaran'?formatRupiah(t.amount):'',t.type]);
+      doc.autoTable({head:[['Tanggal','Deskripsi','Pemasukan','Pengeluaran','Jenis']],body:rows});
+      doc.save('laporan.pdf');
+    }
+  </script>
 </body>
 </html>
