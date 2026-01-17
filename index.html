@@ -717,7 +717,7 @@
             const todayTransactions = allTransactions.filter(t => new Date(t.tanggal).setHours(0,0,0,0) === today.getTime());
 
             if (todayTransactions.length === 0) {
-                aiResultContainer.innerHTML = `<p class="flex items-center justify-center h-full">Belum ada aktivitas hari ini. Ayo mulai catat transaksi pertamamu!</p>`;
+                aiResultContainer.innerHTML = `<p class="flex items-center justify-center h-full">Maintenance, Mohon Maaf!</p>`;
                 return;
             }
 
